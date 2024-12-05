@@ -14,7 +14,7 @@ include("../framework.jl");
             [4.0, 4.0]
         ];
         F = iGMRF(2, 2, 1);
-        θ = [exp(1), 1.0, 2.0, 3.0, 4.0];
+        θ = [1.0, 2.0, 3.0, 4.0, exp(1)];
 
         @test logFunctionalFormPosterior(θ, F=F, Y=Y) ≈ 3/2 - 8 - 501/100 * exp(1)
 
@@ -33,7 +33,7 @@ include("../framework.jl");
     end
 
 
-    @testset "computeFisherInformation(f, θ̂)" begin
+    @testset "computeFisherInformation(logf, θ̂)" begin
         
         μ = 1.0;
         σ² = 2.5;
@@ -47,7 +47,7 @@ include("../framework.jl");
     end
 
 
-    @testset "computeFisherVariance(f, θ̂)" begin
+    @testset "computeFisherVariance(logf, θ̂)" begin
         
         μ = 1.0;
         σ² = 2.5;

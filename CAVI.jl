@@ -17,20 +17,27 @@ Run the CAVI algorithm over the given data and spatial scheme.
 """
 function runCAVI(n_epoch::Integer, epoch_size::Integer; F::iGMRF, Y::Vector{Vector{Float64}})
 
-    Hθ = initializeHyperParams(F, Y);
+    duration = @elapsed begin
+        Hθ = initializeHyperParams(F, Y);
+    end
+    println("Initialization made in ", duration, " s")
 
     MCKL = Float64[];
 
-    for _ = 1:n_epoch
-        push!(MCKL, MonteCarloKL(Hθ, F=F, Y=Y))
-        # println(Hθ)
-        for _ = 1:epoch_size
-            updateHyperParams!(Hθ, F=F, Y=Y);
+    duration = @elapsed begin
+        for _ = 1:n_epoch
+            push!(MCKL, MonteCarloKL(Hθ, F=F, Y=Y))
+            # println(Hθ)
+            for _ = 1:epoch_size
+                updateHyperParams!(Hθ, F=F, Y=Y);
+            end
         end
     end
+    println("Minimization made in ", duration, " s")
     
     return MCKL
 end;
+
 
 """
     initializeHyperParams(F, Y)
@@ -48,7 +55,7 @@ function initializeHyperParams(F::iGMRF, Y::Vector{Vector{Float64}})
 
     m = F.G.m₁ * F.G.m₂;
     
-    mode = findMode(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), [1, fill(0.0, m)...]);
+    mode = findMode(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), [fill(0.0, m)..., 1]);
     α = Optim.minimizer(mode);
 
     Fvar = computeFisherVariance(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), α);
@@ -92,7 +99,7 @@ function MonteCarloKL(Hθ::DenseVector; F::iGMRF, Y::Vector{Vector{Float64}})
     end
     Θ[m+1, :] = rand(Gamma(aᵤ, bᵤ), N);
     
-    logTarget = vec(mapslices(x -> functionalFormPosterior(x; F=F, Y=Y), Θ, dims=1));
+    logTarget = vec(mapslices(x -> logFunctionalFormPosterior(x; F=F, Y=Y), Θ, dims=1));
     logApprox = vec(mapslices(x -> logDensityApprox(x, η=η, s²=s², aᵤ=aᵤ, bᵤ=bᵤ), Θ, dims=1));
     
     return sum(logApprox .- logTarget) / N
@@ -199,8 +206,3 @@ See the mathematical formula in Notion.
 function compute_bᵤ(η::DenseVector, F::iGMRF)
     return 0.5 * η' * F.G.W * η + 0.01
 end
-
-
-function logDensityApprox(x::DenseVector; η::DenseVector, s²::DenseVector, aᵤ::Real, bᵤ::Real)
-    return sum(logpdf.(Normal.(η, sqrt.(s²)), x[1:end-1])) + logpdf(Gamma(aᵤ, bᵤ), x[end]);
-end;
