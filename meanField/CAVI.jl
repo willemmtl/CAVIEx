@@ -1,7 +1,7 @@
 using Optim, Distributions, Gadfly
 
-include("iGMRF.jl");
-include("framework.jl");
+include("../precipModel/iGMRF.jl");
+include("../precipModel/framework.jl");
 
 
 """
@@ -61,7 +61,7 @@ function initializeHyperParams(F::iGMRF, Y::Vector{Vector{Float64}})
     Fvar = computeFisherVariance(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), α);
 
     α₀ = α[2:end]
-    S₀ = round.(Fvar[2:end, 2:end] .* .1 , digits=5);
+    S₀ = round.(Fvar[2:end, 2:end] , digits=5);
 
     η₀ = rand(MvNormal(α₀, S₀));
     b₀ = (η₀' * F.G.W * η₀) / 2 + 1 / 100;

@@ -1,7 +1,7 @@
 using Test
 
-include("../iGMRF.jl");
-include("../dataGen.jl");
+include("../precipModel/iGMRF.jl");
+include("../precipModel/dataGen.jl");
 
 @testset "dataGen.jl" begin
     

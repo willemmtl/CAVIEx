@@ -1,6 +1,6 @@
 using Test
 
-include("../CAVI.jl");
+include("../meanField/CAVI.jl");
 
 @testset "CAVI.jl" begin
     

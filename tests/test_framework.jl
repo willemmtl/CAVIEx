@@ -1,7 +1,7 @@
 using Test, Distributions
 
-include("../iGMRF.jl");
-include("../framework.jl");
+include("../precipModel/iGMRF.jl");
+include("../precipModel/framework.jl");
 
 @testset "framework.jl" begin
     
