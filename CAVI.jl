@@ -1,4 +1,4 @@
-using Optim, Distributions
+using Optim, Distributions, Gadfly
 
 include("iGMRF.jl");
 include("framework.jl");
@@ -17,17 +17,17 @@ Run the CAVI algorithm over the given data and spatial scheme.
 """
 function runCAVI(n_epoch::Integer, epoch_size::Integer; F::iGMRF, Y::Vector{Vector{Float64}})
 
+    ### ---- Initialization ---- ###
     duration = @elapsed begin
         Hθ = initializeHyperParams(F, Y);
     end
     println("Initialization made in ", duration, " s")
-
+    
+    ### ---- Ascent ---- ###
     MCKL = Float64[];
-
     duration = @elapsed begin
         for _ = 1:n_epoch
             push!(MCKL, MonteCarloKL(Hθ, F=F, Y=Y))
-            # println(Hθ)
             for _ = 1:epoch_size
                 updateHyperParams!(Hθ, F=F, Y=Y);
             end
@@ -35,7 +35,7 @@ function runCAVI(n_epoch::Integer, epoch_size::Integer; F::iGMRF, Y::Vector{Vect
     end
     println("Minimization made in ", duration, " s")
     
-    return MCKL
+    return MCKL, Hθ
 end;
 
 
@@ -99,8 +99,8 @@ function MonteCarloKL(Hθ::DenseVector; F::iGMRF, Y::Vector{Vector{Float64}})
     end
     Θ[m+1, :] = rand(Gamma(aᵤ, bᵤ), N);
     
-    logTarget = vec(mapslices(x -> logFunctionalFormPosterior(x; F=F, Y=Y), Θ, dims=1));
-    logApprox = vec(mapslices(x -> logDensityApprox(x, η=η, s²=s², aᵤ=aᵤ, bᵤ=bᵤ), Θ, dims=1));
+    logTarget = evaluateLogMvDensity(x -> logFunctionalFormPosterior(x; F=F, Y=Y), Θ);
+    logApprox = evaluateLogMvDensity(x -> logDensityApprox(x, η=η, s²=s², aᵤ=aᵤ, bᵤ=bᵤ), Θ);
     
     return sum(logApprox .- logTarget) / N
 end;

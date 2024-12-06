@@ -58,6 +58,20 @@ end;
 
 
 """
+    evaluateLogMvDensity(f, supp)
+
+Evaluate a log multivariate density over a given set of vectors.
+
+# Arguments :
+- `f::Function`: Log multivariate density function to evaluate.
+- `supp::Matrix{<:Real}`: Set of n p-arrays stored in a (p x n) matrix.
+"""
+function evaluateLogMvDensity(f::Function, supp::Matrix{<:Real})
+    return vec(mapslices(f, supp, dims=1))
+end
+
+
+"""
     findMode(f, θ₀)
 
 Given a density's functional form, find a mode.

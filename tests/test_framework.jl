@@ -19,6 +19,20 @@ include("../framework.jl");
         @test logFunctionalFormPosterior(θ, F=F, Y=Y) ≈ 3/2 - 8 - 501/100 * exp(1)
 
     end
+
+
+    @testset "evaluateLogMvDensity(f, supp)" begin
+
+        supp = [1 2; 3 4];
+        
+        f(x::DenseVector) = x[1] + x[2]^2;
+
+        res = evaluateLogMvDensity(f, supp);
+
+        @test res[1] == 10;
+        @test res[2] == 18;
+
+    end
     
     
     @testset "findMode(f, θ₀)" begin
