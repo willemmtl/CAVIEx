@@ -1,4 +1,53 @@
 using Gadfly
+
+
+"""
+    plotConvergenceCriterion(MCKL)
+
+Plot evolution of the KL divergence over CAVI epochs.
+
+# Arguments
+- `MCKL::DenseVector`: Values of the KL divergence for each epoch.
+"""
+function plotConvergenceCriterion(MCKL::DenseVector)
+    
+    n_epoch = length(MCKL);
+
+    plot(
+        layer(x=1:n_epoch, y=MCKL, Geom.line),
+        Theme(background_color="white"),
+        Guide.title("Convergence criterion"),
+        Guide.xlabel("Epoch"),
+        Guide.ylabel("KL divergence"),
+    )
+end
+
+
+"""
+    plotConvergenceCriterion(MCKL, path)
+
+Plot evolution of the KL divergence over CAVI epochs.
+
+# Arguments
+- `MCKL::DenseVector`: Values of the KL divergence for each epoch.
+- `path::String`: Where to store the plot.
+"""
+function plotConvergenceCriterion(MCKL::DenseVector, path::String)
+    
+    n_epoch = length(MCKL);
+
+    p = plot(
+        layer(x=1:n_epoch, y=MCKL, Geom.line),
+        Theme(background_color="white"),
+        Guide.title("Convergence criterion"),
+        Guide.xlabel("Epoch"),
+        Guide.ylabel("KL divergence"),
+    )
+
+    draw(PNG(path, dpi=300), p)
+end
+
+
 """
     plotApproxVSMCMC(approxDensity, MCMCsample; a, b, xLabel, yLabel)
 
