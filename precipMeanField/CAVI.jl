@@ -1,7 +1,8 @@
 using Optim, Distributions, Gadfly
 
-include("../precipModel/iGMRF.jl");
-include("../precipModel/framework.jl");
+include("../precipFramework/iGMRF.jl");
+include("../precipFramework/utils.jl");
+include("model.jl");
 
 
 """
@@ -107,24 +108,6 @@ end;
 
 
 """
-    compute_s²(aᵤ, bᵤ, n, n_neighbors)
-
-Compute the approximation variances for the location parameters.
-
-See the mathematical formula in Notion.
-
-# Arguments :
-- `aᵤ::Real`: First parameter of the approximation Gamma density for the precision parameter.
-- `bᵤ::Real`: Second parameter of the approximation Gamma density for the precision parameter.
-- `n_obs::Integer`: Number of observations per cell (the same for all cells for now).
-- `n_neighbors::Vector{<:Real}`: Number of neighbors for each cell.
-"""
-function compute_s²(aᵤ::Real, bᵤ::Real, n_obs::Integer, n_neighbors::Vector{<:Real})
-    return bᵤ ./ (bᵤ .* n_obs .+ aᵤ .* n_neighbors)
-end
-
-
-"""
     updateHyperParams!(Hθ; F, Y)
 
 Update approximation parameters η and bᵤ.
@@ -149,60 +132,3 @@ function updateHyperParams!(Hθ::DenseVector; F::iGMRF, Y::Vector{Vector{Float64
     Hθ[m+1] = compute_bᵤ(Hθ[1:m], F);
     
 end;
-
-
-"""
-    compute_aᵤ(m)
-
-Compute the first parameter for precision's approximation.
-
-See the mathematical formula in Notion.
-
-# Arguments :
-- `m::Integer`: Number of cells.
-"""
-function compute_aᵤ(m::Integer)
-    return (m-1)/2 + 1
-end
-
-
-"""
-    compute_η(k, η; aᵤ, bᵤ, F, Y)
-
-Compute the mean parameter for location parameter's approximation.
-
-See the mathematical formula in Notion.
-
-# Arguments :
-- `k::Integer`: Numero of the cell to update.
-- `η::DenseVector`: Current values of the mean parameters for location parameter's approximation.
-- `aᵤ::Real`: First parameter for precision's approximation.
-- `bᵤ::Real`: Second parameter for precision's approximation.
-- `F::iGMRF`: Spatial scheme.
-- `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
-"""
-function compute_η(k::Integer, η::DenseVector; aᵤ::Real, bᵤ::Real, F::iGMRF, Y::Vector{Vector{Float64}})
-    
-    Sη = (- F.G.W̄ * η)[k]
-    Sy = sum(Y[k]);
-    n_obs = length(Y[k]);
-    n_neighbors = F.G.W[k, k];
-
-    return (aᵤ * Sη + bᵤ * Sy) / (bᵤ * n_obs + aᵤ * n_neighbors)
-end
-
-
-"""
-    compute_bᵤ(η, F)
-
-Compute the second parameter for precision's approximation.
-
-See the mathematical formula in Notion.
-
-# Arguments :
-- `η::DenseVector`: Mean approximation vector for location parameters.
-- `F::iGMRF`: Spatial scheme.
-"""
-function compute_bᵤ(η::DenseVector, F::iGMRF)
-    return 0.5 * η' * F.G.W * η + 0.01
-end
