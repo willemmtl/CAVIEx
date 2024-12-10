@@ -1,6 +1,6 @@
 using Test, Random, Distributions
 
-include("../precipModel/iGMRF.jl");
+include("../precipFramework/iGMRF.jl");
 
 @testset "iGMRF.jl" begin
 

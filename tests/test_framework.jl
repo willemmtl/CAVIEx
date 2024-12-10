@@ -1,7 +1,8 @@
 using Test, Distributions
 
-include("../precipModel/iGMRF.jl");
-include("../precipModel/framework.jl");
+include("../precipFramework/iGMRF.jl");
+include("../precipFramework/utils.jl");
+include("../precipMeanField/model.jl");
 
 @testset "framework.jl" begin
     
