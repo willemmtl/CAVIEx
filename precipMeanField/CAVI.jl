@@ -20,10 +20,11 @@ Run the CAVI algorithm over the given data and spatial scheme.
 function runCAVI(n_epoch::Integer, epoch_size::Integer, Hθ₀::DenseVector; F::iGMRF, Y::Vector{Vector{Float64}})
 
     ### ---- Initialization ---- ###
+    MCKL = Float64[];
     Hθ = Hθ₀;
+    push!(MCKL, MonteCarloKL(Hθ, F=F, Y=Y))
     
     ### ---- Ascent ---- ###
-    MCKL = Float64[];
     duration = @elapsed begin
         for _ = 1:n_epoch
             push!(MCKL, MonteCarloKL(Hθ, F=F, Y=Y))
@@ -131,7 +132,7 @@ function MonteCarloKL(Hθ::DenseVector; F::iGMRF, Y::Vector{Vector{Float64}})
     for i = 1:m
         Θ[i, :] = rand(Normal(η[i], sqrt(s²[i])), N);
     end
-    Θ[m+1, :] = rand(Gamma(aᵤ, bᵤ), N);
+    Θ[m+1, :] = rand(Gamma(aᵤ, 1/bᵤ), N);
     
     logTarget = evaluateLogMvDensity(x -> logFunctionalFormPosterior(x; F=F, Y=Y), Θ);
     logApprox = evaluateLogMvDensity(x -> logDensityApprox(x, η=η, s²=s², aᵤ=aᵤ, bᵤ=bᵤ), Θ);

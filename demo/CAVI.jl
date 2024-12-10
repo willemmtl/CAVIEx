@@ -48,7 +48,7 @@ Compute the convergence criterion with current hyper-parameters.
 """
 function MonteCarloKL(Hθ::DenseVector; Y::Vector{Float64})
     
-    N = 1000;
+    N = 10000;
     Θ = zeros(4, N);
 
     α, β, m, s² = Hθ;
@@ -60,7 +60,7 @@ function MonteCarloKL(Hθ::DenseVector; Y::Vector{Float64})
     Hθ[4] = compute_s²(α, β, Y=Y);
     
     Θ[1, :] = rand(Normal(m, sqrt(s²)), N);
-    Θ[2, :] = rand(Gamma(α, β), N);
+    Θ[2, :] = rand(InverseGamma(α, β), N);
     
     logTarget = evaluateLogMvDensity(x -> logTargetDensity(x, Y=Y), Θ);
     logApprox = evaluateLogMvDensity(x -> logApproxDensity(x, Hθ=Hθ), Θ);

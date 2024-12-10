@@ -23,7 +23,7 @@ end
 - `Hθ::Vector{<:Real}`: Hyper-parameters [α, β, m, s²].
 """
 function logApproxDensity(θ::DenseVector; Hθ::Vector{<:Real})
-    return logpdf(Normal(Hθ[3], sqrt(Hθ[4])), θ[1]) + logpdf(Gamma(Hθ[1], Hθ[2]), θ[2])
+    return logpdf(Normal(Hθ[3], sqrt(Hθ[4])), θ[1]) + logpdf(InverseGamma(Hθ[1], Hθ[2]), θ[2])
 end
 
 

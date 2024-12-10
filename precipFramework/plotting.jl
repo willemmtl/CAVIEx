@@ -11,11 +11,11 @@ Plot evolution of the KL divergence over CAVI epochs.
 """
 function plotConvergenceCriterion(MCKL::DenseVector)
     
-    n_epoch = length(MCKL);
+    n_mckl = length(MCKL);
 
     plot(
-        layer(x=1:n_epoch, y=MCKL, Geom.line),
-        layer(x=1:n_epoch, y=MCKL, Geom.point, shape=[Shape.cross], Theme(default_color="red")),
+        layer(x=1:n_mckl, y=MCKL, Geom.line),
+        layer(x=1:n_mckl, y=MCKL, Geom.point, shape=[Shape.cross], Theme(default_color="red")),
         Theme(background_color="white"),
         Guide.title("Convergence criterion"),
         Guide.xlabel("Epoch"),

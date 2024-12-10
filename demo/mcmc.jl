@@ -20,7 +20,7 @@ function mcmc(n_iter::Integer; Y::Vector{<:Real})
 
     for j = 2:n_iter
 
-        θ[1, j] = rand(Normal(mean(Y), θ[2, j-1] / n));
+        θ[1, j] = rand(Normal(mean(Y), sqrt(θ[2, j-1] / n)));
         θ[2, j] = rand(InverseGamma(.5 * n, .5 * sum((Y .- θ[1, j]) .^ 2)));
         
     end

@@ -40,7 +40,7 @@ Evaluate the log-density of approximation of the variational inference.
 - `bᵤ::Real`: Second parameter of the precision's approximation.
 """
 function logDensityApprox(x::DenseVector; η::DenseVector, s²::DenseVector, aᵤ::Real, bᵤ::Real)
-    return sum(logpdf.(Normal.(η, sqrt.(s²)), x[1:end-1])) + logpdf(Gamma(aᵤ, bᵤ), x[end]);
+    return sum(logpdf.(Normal.(η, sqrt.(s²)), x[1:end-1])) + logpdf(Gamma(aᵤ, 1/bᵤ), x[end]);
 end;
 
 
