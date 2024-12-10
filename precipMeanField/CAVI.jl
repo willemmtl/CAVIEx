@@ -13,6 +13,39 @@ Run the CAVI algorithm over the given data and spatial scheme.
 # Arguments :
 - `n_epoch::Integer`: Number of epochs to compute i.e. number of type we'll compute the convergence criterion.
 - `epoch_size::Integer`: Size of each epoch i.e. number of iterations before computing the convergence criterion.
+- `Hθ₀::DenseVector`: Initial values of the hyper-parameters.
+- `F::iGMRF`: Spatial scheme containing the structure matrix and rank defficiency.
+- `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
+"""
+function runCAVI(n_epoch::Integer, epoch_size::Integer, Hθ₀::DenseVector; F::iGMRF, Y::Vector{Vector{Float64}})
+
+    ### ---- Initialization ---- ###
+    Hθ = Hθ₀;
+    
+    ### ---- Ascent ---- ###
+    MCKL = Float64[];
+    duration = @elapsed begin
+        for _ = 1:n_epoch
+            push!(MCKL, MonteCarloKL(Hθ, F=F, Y=Y))
+            for _ = 1:epoch_size
+                updateHyperParams!(Hθ, F=F, Y=Y);
+            end
+        end
+    end
+    println("Minimization made in ", duration, " s")
+    
+    return MCKL, Hθ
+end;
+
+
+"""
+    runCAVI(n_epoch, epoch_size; F, Y)
+
+Run the CAVI algorithm over the given data and spatial scheme.
+
+# Arguments :
+- `n_epoch::Integer`: Number of epochs to compute i.e. number of type we'll compute the convergence criterion.
+- `epoch_size::Integer`: Size of each epoch i.e. number of iterations before computing the convergence criterion.
 - `F::iGMRF`: Spatial scheme containing the structure matrix and rank defficiency.
 - `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
 """

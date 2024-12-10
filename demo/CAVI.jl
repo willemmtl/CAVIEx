@@ -13,12 +13,13 @@ Run the CAVI algorithm over the given data and spatial scheme.
 # Arguments :
 - `n_epoch::Integer`: Number of epochs to compute i.e. number of type we'll compute the convergence criterion.
 - `epoch_size::Integer`: Size of each epoch i.e. number of iterations before computing the convergence criterion.
+- `Hθ₀::DenseVector`: Initial values of the hyper-parameters.
 - `Y::Vector{Float64}`: Sample (xᵢ)ᵢ.
 """
-function runCAVI(n_epoch::Integer, epoch_size::Integer; Y::Vector{Float64})
+function runCAVI(n_epoch::Integer, epoch_size::Integer, Hθ₀::DenseVector; Y::Vector{Float64})
 
     ### ---- Initialization ---- ###
-    Hθ = initializeHyperParams();
+    Hθ = Hθ₀;
     
     ### ---- Ascent ---- ###
     MCKL = Float64[];
@@ -33,20 +34,6 @@ function runCAVI(n_epoch::Integer, epoch_size::Integer; Y::Vector{Float64})
     println("Minimization made in ", duration, " s")
     
     return MCKL, Hθ
-end;
-
-
-"""
-    initializeHyperParams()
-
-Initialize hyperparameters.
-
-[α, β, m, s²] = [1.0, 1.0, 0.0, 1.0].
-"""
-function initializeHyperParams()
-
-    return [1.0, 1.0, 0.0, 1.0];
-
 end;
 
 

@@ -15,6 +15,7 @@ function plotConvergenceCriterion(MCKL::DenseVector)
 
     plot(
         layer(x=1:n_epoch, y=MCKL, Geom.line),
+        layer(x=1:n_epoch, y=MCKL, Geom.point, shape=[Shape.cross], Theme(default_color="red")),
         Theme(background_color="white"),
         Guide.title("Convergence criterion"),
         Guide.xlabel("Epoch"),
@@ -38,6 +39,7 @@ function plotConvergenceCriterion(MCKL::DenseVector, path::String)
 
     p = plot(
         layer(x=1:n_epoch, y=MCKL, Geom.line),
+        layer(x=1:n_epoch, y=MCKL, Geom.point, shape=[Shape.cross], Theme(default_color="red")),
         Theme(background_color="white"),
         Guide.title("Convergence criterion"),
         Guide.xlabel("Epoch"),
