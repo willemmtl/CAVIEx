@@ -1,27 +1,9 @@
 using Test, Distributions
 
-include("../precipFramework/iGMRF.jl");
 include("../precipFramework/utils.jl");
-include("../precipMeanField/model.jl");
 
-@testset "framework.jl" begin
+@testset "utils.jl" begin
     
-    @testset "logFunctionalFormPosterior(θ; F, Y)" begin
-        
-        Y = [
-            [1.0, 1.0],
-            [2.0, 2.0],
-            [3.0, 3.0],
-            [4.0, 4.0]
-        ];
-        F = iGMRF(2, 2, 1);
-        θ = [1.0, 2.0, 3.0, 4.0, exp(1)];
-
-        @test logFunctionalFormPosterior(θ, F=F, Y=Y) ≈ 3/2 - 8 - 501/100 * exp(1)
-
-    end
-
-
     @testset "evaluateLogMvDensity(f, supp)" begin
 
         supp = [1 2; 3 4];

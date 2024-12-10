@@ -1,3 +1,8 @@
+using Distributions
+
+include("../precipFramework/iGMRF.jl");
+
+
 """
     logFunctionalFormPosterior(θ; F, Y)
 

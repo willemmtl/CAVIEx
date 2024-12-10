@@ -1,4 +1,4 @@
-using Distributions, Optim, ForwardDiff
+using Distributions, Optim, ForwardDiff, LinearAlgebra
 
 
 """
