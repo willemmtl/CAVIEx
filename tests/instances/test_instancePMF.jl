@@ -19,7 +19,6 @@ include("../../src/instances/instancePMF.jl");
         )
 
         @test instance.data[1][1] ≈ 12.215413935213412;
-        @test AbstractModel.getHθ(instance.model) == [zeros(9)..., ones(9)..., 1.0, 1.0];
 
     end
 

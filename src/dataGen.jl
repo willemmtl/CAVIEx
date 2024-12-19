@@ -1,6 +1,4 @@
-using Random, Distributions, SparseArrays
-
-include("iGMRF.jl")
+using Random, Distributions, SparseArrays, GMRF
 
 function generateData(grid_params::Array{<:Real}, nobs::Integer)
 
@@ -24,19 +22,17 @@ function generateTargetGrid(F::iGMRF)
     # Paramètre de position
     μ = generateGEVParam(F)
     # Paramètre d'échelle
-    ϕ = zeros(F.G.m₁, F.G.m₂)
+    ϕ = zeros(F.G.gridSize...)
     # Paramètre de forme
-    ξ = zeros(F.G.m₁, F.G.m₂)
+    ξ = zeros(F.G.gridSize...)
     # Concatène les paramètres pour former la grille finale m₁xm₂x3
     return cat(μ, exp.(ϕ), ξ, dims=3)
 end
 
 function generateGEVParam(F::iGMRF)
-    # Nombre total de cellules
-    m = F.G.m₁ * F.G.m₂
     # Génère les effets spatiaux
-    s = sampleIGMRF(F)
+    s = rand(F)
     # Il n'y a pas de variable explicative
     # On renvoie donc directement les effets spatiaux
-    return reshape(s, F.G.m₁, F.G.m₂)'
+    return reshape(s, F.G.gridSize...)'
 end
