@@ -16,7 +16,7 @@ using .PrecipMeanField
 
     @testset "refine_s²(Hθ, k; F, Y)" begin
 
-        s² = PrecipMeanField.refine_s²(Hθ, F=F, Y=Y);
+        s² = PrecipMeanField.refine_s²(Hθ, 1, F=F, Y=Y);
 
         @test s² ≈ 0.2;
 

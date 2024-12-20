@@ -57,7 +57,7 @@ include("../src/CAVI.jl");
                 Hθ -> PrecipMeanField.refine_bᵤ(Hθ, F=F),
             ]
         )
-        Hθ₀ = [[float(i) for i = 1:m]..., ones(m)..., 1.0, 2.0];
+        Hθ₀ = [[float(i) for i = 1:m]..., ones(m)..., 5.0, 2.0];
         precipModel.hyperParamsValue .= Hθ₀;
 
         refineHyperParams!(precipModel)
