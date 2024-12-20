@@ -63,7 +63,8 @@ include("../src/CAVI.jl");
         refineHyperParams!(precipModel)
 
         @test precipModel.hyperParamsValue[1] ≈ 16/7;
-        @test precipModel.hyperParamsValue[2] ≈ 430/133;
+        @test precipModel.hyperParamsTrace["η2"][1] ≈ 430/133;
+        @test precipModel.hyperParamsTrace["aᵤ"][1] ≈ 5.0;
     end
 
 end
