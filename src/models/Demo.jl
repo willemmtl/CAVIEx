@@ -1,3 +1,7 @@
+module Demo
+
+using Statistics
+
 """
     logTargetDensity(θ; Y)
 
@@ -16,65 +20,97 @@ end
 
 
 """
-    logApproxDensity(θ; Hθ)
+    logApproxDensity(θ, Hθ)
 
 # Arguments :
 - `θ::DenseVector`: Parameters to infer [μ, σ²].
 - `Hθ::Vector{<:Real}`: Hyper-parameters [α, β, m, s²].
 """
-function logApproxDensity(θ::DenseVector; Hθ::Vector{<:Real})
-    return logpdf(Normal(Hθ[3], sqrt(Hθ[4])), θ[1]) + logpdf(InverseGamma(Hθ[1], Hθ[2]), θ[2])
+function logApproxDensity(θ::DenseVector, Hθ::Vector{<:Real})
+    return logpdf(μMarginal(Hθ), θ[1]) + logpdf(σ²Marginal(Hθ), θ[2])
 end
 
 
 """
-    compute_α(; Y)
+    μMarginal(Hθ)
+
+# Arguments :
+- `Hθ::DenseVector`: Hyper-parameters -> [α, β, m, s²].
+"""
+function μMarginal(Hθ::DenseVector)
+    return Normal(Hθ[3], sqrt(Hθ[4]))
+end
+
+
+"""
+    σ²Marginal(Hθ)
+
+# Arguments :
+- `Hθ::DenseVector`: Hyper-parameters -> [α, β, m, s²].
+"""
+function σ²Marginal(Hθ::DenseVector)
+    return InverseGamma(Hθ[1], Hθ[2])
+end
+
+
+"""
+    refine_α(; Y)
 
 Compute the first parameter of σ²'s approximation.
 
 # Arguments :
 - `Y::Vector{Float64}`:Sample.
 """
-function compute_α(; Y::Vector{Float64})
+function refine_α(; Y::Vector{Float64})
     return length(Y)/2
 end
 
 
 """
-    compute_β(m, s²; Y)
+    refine_β(Hθ; Y)
 
 Compute the second parameter of σ²'s approximation.
 
 # Arguments :
-- `m::Real`: Mean of μ's approximation.
-- `s²::Real`: Variance of μ's approximation.
+- `Hθ::DenseVector`: Hyper-parameters -> [α, β, m, s²].
 - `Y::Vector{Float64}`: Sample.
 """
-function compute_β(m::Real, s²::Real; Y::Vector{Float64})
+function refine_β(Hθ::DenseVector; Y::Vector{Float64})
+    
+    m = Hθ[3];
+    s² = Hθ[4];
+
     return 0.5 * (sum(Y.^2) + length(Y)*(s² + m^2) - 2*m*length(Y)*mean(Y))
 end
 
 
 """
-    compute_m(; Y)
+    refine_m(; Y)
 
 Compute the mean of μ's approximation.
 
 # Arguments :
 - `Y::Vector{Float64}`: Sample.
 """
-function compute_m(; Y::Vector{Float64})
+function refine_m(; Y::Vector{Float64})
     return mean(Y)
 end
 
 
 """
-    compute_s²(α, β; Y)
+    refine_s²(Hθ; Y)
 
 Compute the variance of μ's approximation.
 
 # Arguments :
+- `Hθ::DenseVector`: Hyper-parameters -> [α, β, m, s²].
 """
-function compute_s²(α::Real, β::Real; Y::Vector{Float64})
+function refine_s²(Hθ::DenseVector; Y::Vector{Float64})
+    
+    α = Hθ[1];
+    β = Hθ[2];
+
     return (α + β + 2) / length(Y) / (α + 2)
+end
+
 end
