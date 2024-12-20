@@ -120,7 +120,7 @@ end
 
 
 """
-refine_s²(Hθ, k; F, Y)
+    refine_s²(Hθ, k; F, Y)
 
 Refine the approximation variances for the location parameters.
     
