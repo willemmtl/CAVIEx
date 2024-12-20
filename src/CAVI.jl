@@ -55,17 +55,37 @@ Compute the convergence criterion with current hyper-parameters.
 function MonteCarloKL(model::AbstractModel.BaseModel)
     
     N = 10000;
-    supp = zeros(model.nHyperParams, N);
 
-    for (i, marginal) in enumerate(model.approxMarginals)
-        supp[i, :] = rand(marginal(model.hyperParamsValue), N);
-    end
+    supp = generateApproxSample(model, N);
 
     logTarget = evaluateLogMvDensity(x -> model.logTargetDensity(x), supp);
     logApprox = evaluateLogMvDensity(x -> model.logApproxDensity(x, model.hyperParamsValue), supp);
     
     return sum(logApprox .- logTarget) / N
 end;
+
+
+"""
+    generateApproxSample(model)
+
+Draw samples from the approximating distribution with current hyper-parameters.
+
+Use the mean-field approximation by generating each variable independantly.
+Will be used to compute KL divergence.
+
+# Arguments :
+- `N::Integer`: Sample size.
+"""
+function generateApproxSample(model::AbstractModel.BaseModel, N::Integer)
+    
+    supp = zeros(length(model.approxMarginals), N);
+
+    for (i, marginal) in enumerate(model.approxMarginals)
+        supp[i, :] = rand(marginal(model.hyperParamsValue), N);
+    end
+    
+    return supp
+end
 
 
 """

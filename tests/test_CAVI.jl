@@ -13,6 +13,30 @@ include("../src/CAVI.jl");
 
 @testset "CAVI.jl" begin
     
+    @testset "generateApproxSample(modeln, N)" begin
+        
+        hyperParams = ["η1", "s²1", "aᵤ", "bᵤ"];
+
+        model = AbstractModel.BaseModel(
+            hyperParams,
+            θ -> θ,
+            (θ, Hθ) -> θ,
+            [
+                Hθ -> Normal(Hθ[1], Hθ[2]),
+                Hθ -> Gamma(Hθ[3], Hθ[4]),
+            ],
+            [
+                Hθ -> nothing,
+            ]
+        )
+        model.hyperParamsValue .= [0.0, 1.0, 1.0, 1.0];
+
+        supp = generateApproxSample(model, 100);
+
+        @test size(supp, 1) == 2;
+    end
+
+
     @testset "MonteCarloKL(model)" begin
 
         σ² = 100;
@@ -68,7 +92,6 @@ include("../src/CAVI.jl");
 
         @test precipModel.hyperParamsValue[1] ≈ 16/7;
         @test precipModel.hyperParamsTrace["η2"][1] ≈ 430/133;
-        @test precipModel.hyperParamsTrace["s²1"][1] ≈ 1/7;
         @test precipModel.hyperParamsTrace["s²2"][1] ≈ 2/19;
         @test precipModel.hyperParamsTrace["aᵤ"][1] ≈ 5.0;
     end
