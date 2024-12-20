@@ -1,5 +1,10 @@
 using Gadfly
 
+if !isdefined(Main, :AbstractModel)
+    include("../src/models/AbstractModel.jl");
+end
+using .AbstractModel
+
 
 """
     plotConvergenceCriterion(MCKL)
@@ -47,6 +52,35 @@ function plotConvergenceCriterion(MCKL::DenseVector, path::String)
     )
 
     draw(PNG(path, dpi=300), p)
+end
+
+
+"""
+    plotTrace(model, hyperParam)
+
+Plot evolution of a given hyper-parameter over CAVI iterations.
+
+# Arguments
+- `model::AbstractModel.BaseModel`: Model.
+- `hyperParam::String`: Hyper-parameter name as it is written in the model.
+"""
+function plotTrace(model::AbstractModel.BaseModel, hyperParam::String)
+    
+    if isnothing(model.hyperParamsTrace[hyperParam])
+        error("Aucune trace n'est disponible !")
+    end
+
+    n_values = length(model.hyperParamsTrace[hyperParam]);
+    values = model.hyperParamsTrace[hyperParam];
+
+    plot(
+        layer(x=1:n_values, y=values, Geom.line),
+        layer(x=1:n_values, y=values, Geom.point, shape=[Shape.cross], Theme(default_color="red")),
+        Theme(background_color="white"),
+        Guide.title("Trace de $hyperParam"),
+        Guide.xlabel("Itérations"),
+        Guide.ylabel("Valeur"),
+    )
 end
 
 
