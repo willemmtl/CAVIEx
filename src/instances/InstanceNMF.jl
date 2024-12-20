@@ -4,18 +4,18 @@ if !isdefined(Main, :AbstractModel)
     include("../models/AbstractModel.jl");
 end
 using .AbstractModel
-if !isdefined(Main, :PrecipMeanField)
-    include("../models/PrecipMeanField.jl");
+if !isdefined(Main, :NormalMeanField)
+    include("../models/NormalMeanField.jl");
 end
-using .PrecipMeanField
+using .NormalMeanField
 
-include("../dataGen/dataGenExtreme.jl");
+include("../dataGen/dataGenNormal.jl");
 
 
 """
-    InstancePMF
+    InstanceNMF
 
-Generate an instance of a PrecipMeanField model.
+Generate an instance of a NormalMeanField model.
 
 # Attributes :
 - `F::iGMRF`: Spatial scheme.
@@ -24,13 +24,13 @@ Generate an instance of a PrecipMeanField model.
 - `model::AbstractModel.BaseModel`: Every function needed in the model.
     -> See BaseModel.
 """
-struct InstancePMF
+struct InstanceNMF
     F::iGMRF
     gridTarget::Array{Float64, 3}
     data::Vector{Vector{<:Real}}
     model::AbstractModel.BaseModel
 
-    function InstancePMF(
+    function InstanceNMF(
         m₁::Integer,
         m₂::Integer;
         seed::Integer,
@@ -53,17 +53,17 @@ struct InstancePMF
             data,
             AbstractModel.BaseModel(
                 hyperParams,
-                θ -> PrecipMeanField.logTargetDensity(θ, F=F, Y=data),
-                (θ, Hθ) -> PrecipMeanField.logApproxDensity(θ, Hθ, F=F),
+                θ -> NormalMeanField.logTargetDensity(θ, F=F, Y=data),
+                (θ, Hθ) -> NormalMeanField.logApproxDensity(θ, Hθ, F=F),
                 [
-                    [Hθ -> PrecipMeanField.μMarginal(Hθ, k=k, F=F) for k = 1:m]...,
-                    Hθ -> PrecipMeanField.κMarginal(Hθ, F=F)
+                    [Hθ -> NormalMeanField.μMarginal(Hθ, k=k, F=F) for k = 1:m]...,
+                    Hθ -> NormalMeanField.κMarginal(Hθ, F=F)
                 ],
                 [
-                    [Hθ -> PrecipMeanField.refine_η(Hθ, k, F=F, Y=data) for k = 1:m]...,
-                    [Hθ -> PrecipMeanField.refine_s²(Hθ, k, F=F, Y=data) for k = 1:m]...,
-                    Hθ -> PrecipMeanField.refine_aᵤ(F=F),
-                    Hθ -> PrecipMeanField.refine_bᵤ(Hθ, F=F),
+                    [Hθ -> NormalMeanField.refine_η(Hθ, k, F=F, Y=data) for k = 1:m]...,
+                    [Hθ -> NormalMeanField.refine_s²(Hθ, k, F=F, Y=data) for k = 1:m]...,
+                    Hθ -> NormalMeanField.refine_aᵤ(F=F),
+                    Hθ -> NormalMeanField.refine_bᵤ(Hθ, F=F),
                 ]
             )
         )

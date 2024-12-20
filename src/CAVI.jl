@@ -23,6 +23,9 @@ Initial values must be entered by the user.
 """
 function runCAVI(n_epoch::Integer, epoch_size::Integer, Hθ₀::DenseVector, model::AbstractModel.BaseModel)
 
+    ### ---- Basic checks ---- ###
+    checkIfClear(model);
+
     ### ---- Initialization ---- ###
     model.hyperParamsValue .= Hθ₀;
     AbstractModel.storeValues(model)
@@ -42,6 +45,27 @@ function runCAVI(n_epoch::Integer, epoch_size::Integer, Hθ₀::DenseVector, mod
     
     return MCKL
 end;
+
+
+"""
+    checkIfClear(model)
+
+Check whether the model is clear before running CAVI.
+"""
+function checkIfClear(model::AbstractModel.BaseModel)
+
+    n_trace = 0;
+    for hyperParam in model.hyperParams
+        if !isnothing(model.hyperParamsTrace[hyperParam])
+            n_trace += 1;
+        end
+    end
+
+    if n_trace != 0
+        @warn "Model may have not been cleared : $n_trace traces are not empty."
+    end
+
+end
 
 
 """

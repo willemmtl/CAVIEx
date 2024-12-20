@@ -20,7 +20,7 @@ end
 
 function generateTargetGrid(F::iGMRF)
     # Paramètre de position
-    μ = generateGEVParam(F)
+    μ = generateParams(F)
     # Paramètre d'échelle
     ϕ = zeros(F.G.gridSize...)
     # Paramètre de forme
@@ -29,7 +29,7 @@ function generateTargetGrid(F::iGMRF)
     return cat(μ, exp.(ϕ), ξ, dims=3)
 end
 
-function generateGEVParam(F::iGMRF)
+function generateParams(F::iGMRF)
     # Génère les effets spatiaux
     s = rand(F)
     # Il n'y a pas de variable explicative
