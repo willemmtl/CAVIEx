@@ -1,8 +1,12 @@
 using Test, GMRF
 
-include("../../src/models/AbstractModel.jl");
+if !isdefined(Main, :AbstractModel)
+    include("../../src/models/AbstractModel.jl");
+end
 using .AbstractModel
-include("../../src/models/PrecipMeanField.jl");
+if !isdefined(Main, :PrecipMeanField)
+    include("../../src/models/PrecipMeanField.jl");
+end
 using .PrecipMeanField
 
 @testset "AbstractModel.jl" begin

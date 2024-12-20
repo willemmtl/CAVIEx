@@ -32,15 +32,15 @@ function runCAVI(n_epoch::Integer, epoch_size::Integer, Hθ₀::DenseVector, mod
     ### ---- Ascent ---- ###
     duration = @elapsed begin
         for _ = 1:n_epoch
-            push!(MCKL, MonteCarloKL(model))
             for _ = 1:epoch_size
                 refineHyperParams!(model);
             end
+            push!(MCKL, MonteCarloKL(model))
         end
     end
     println("Minimization made in ", duration, " s")
     
-    return MCKL, Hθ
+    return MCKL
 end;
 
 

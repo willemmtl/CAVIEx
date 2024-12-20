@@ -1,8 +1,12 @@
 using Test, Distributions, GMRF
 
-include("../src/models/AbstractModel.jl");
+if !isdefined(Main, :AbstractModel)
+    include("../src/models/AbstractModel.jl");
+end
 using .AbstractModel
-include("../src/models/PrecipMeanField.jl");
+if !isdefined(Main, :PrecipMeanField)
+    include("../src/models/PrecipMeanField.jl");
+end
 using .PrecipMeanField
 
 include("../src/CAVI.jl");
@@ -64,6 +68,8 @@ include("../src/CAVI.jl");
 
         @test precipModel.hyperParamsValue[1] ≈ 16/7;
         @test precipModel.hyperParamsTrace["η2"][1] ≈ 430/133;
+        @test precipModel.hyperParamsTrace["s²1"][1] ≈ 1/7;
+        @test precipModel.hyperParamsTrace["s²2"][1] ≈ 2/19;
         @test precipModel.hyperParamsTrace["aᵤ"][1] ≈ 5.0;
     end
 

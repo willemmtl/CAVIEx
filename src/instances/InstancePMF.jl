@@ -4,7 +4,9 @@ if !isdefined(Main, :AbstractModel)
     include("../models/AbstractModel.jl");
 end
 using .AbstractModel
-include("../models/PrecipMeanField.jl");
+if !isdefined(Main, :PrecipMeanField)
+    include("../models/PrecipMeanField.jl");
+end
 using .PrecipMeanField
 
 include("../dataGen.jl");
