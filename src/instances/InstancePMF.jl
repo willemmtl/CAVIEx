@@ -56,12 +56,12 @@ struct InstancePMF
                 θ -> PrecipMeanField.logTargetDensity(θ, F=F, Y=data),
                 (θ, Hθ) -> PrecipMeanField.logApproxDensity(θ, Hθ, F=F),
                 [
-                    [Hθ -> PrecipMeanField.μMarginal(Hθ, k=k, F=F) for k = 1:4]...,
+                    [Hθ -> PrecipMeanField.μMarginal(Hθ, k=k, F=F) for k = 1:m]...,
                     Hθ -> PrecipMeanField.κMarginal(Hθ, F=F)
                 ],
                 [
-                    [Hθ -> PrecipMeanField.refine_η(Hθ, k, F=F, Y=data) for k = 1:4]...,
-                    [Hθ -> PrecipMeanField.refine_s²(Hθ, k, F=F, Y=data) for k = 1:4]...,
+                    [Hθ -> PrecipMeanField.refine_η(Hθ, k, F=F, Y=data) for k = 1:m]...,
+                    [Hθ -> PrecipMeanField.refine_s²(Hθ, k, F=F, Y=data) for k = 1:m]...,
                     Hθ -> PrecipMeanField.refine_aᵤ(F=F),
                     Hθ -> PrecipMeanField.refine_bᵤ(Hθ, F=F),
                 ]

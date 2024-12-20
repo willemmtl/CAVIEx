@@ -19,6 +19,7 @@ include("../../src/instances/instancePMF.jl");
         )
 
         @test instance.data[1][1] ≈ 12.215413935213412;
+        @test instance.model.nHyperParams == length(instance.model.refiningFunctions);
 
     end
 
