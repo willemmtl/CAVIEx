@@ -35,13 +35,6 @@ F = iGMRF(m₁, m₂, 1, NaN);
 Y = [float.([i*2, i*2+1]) for i = 0:m-1];
 
 params = OrderedDict(
-    :κᵤ => (
-        Gamma,
-        OrderedDict(
-            :α => (2*m+1, :aᵤ, Hθ -> NormalMeanField.refine_aᵤ(F=F)),
-            :θ => (2*m+2, :bᵤ, Hθ -> NormalMeanField.refine_bᵤ(Hθ, F=F)),
-        ),
-    ),
     (
         Symbol("μ$k") => (
             Normal,
@@ -52,6 +45,13 @@ params = OrderedDict(
         )
         for k = 1:m
     )...,
+    :κᵤ => (
+        Gamma,
+        OrderedDict(
+            :α => (2*m+1, :aᵤ, Hθ -> NormalMeanField.refine_aᵤ(F=F)),
+            :θ => (2*m+2, :bᵤ, Hθ -> NormalMeanField.refine_bᵤ(Hθ, F=F)),
+        ),
+    ),
 );
 
 refiningModel = CAVIEx.Model(
