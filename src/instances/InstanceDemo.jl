@@ -1,16 +1,14 @@
-using GMRF
+using Distributions, Random, OrderedCollections
 
-if !isdefined(Main, :AbstractModel)
-    include("../models/AbstractModel.jl");
+if !isdefined(Main, :CAVIEx)
+    include("../CAVIEx.jl");
 end
-using .AbstractModel
+using .CAVIEx
+
 if !isdefined(Main, :Demo)
     include("../models/Demo.jl");
 end
 using .Demo
-
-include("../dataGen/dataGenNormal.jl");
-
 
 """
     InstanceDemo
@@ -20,13 +18,12 @@ Generate an instance of a Demo model.
 # Attributes :
 - `realParams::DenseVector`: True values of μ and σ².
 - `data::Vector{Vector{<:Real}}`: Sample from the real distribution.
-- `model::AbstractModel.BaseModel`: Every function needed in the model.
-    -> See BaseModel.
+- `model::CAVIEx.Model`: Generic model.
 """
 struct InstanceDemo
-    realParams::DenseVector
-    data::Vector{Vector{<:Real}}
-    model::AbstractModel.BaseModel
+    realParams::Dict{Symbol, Float64}
+    data::Vector{<:Real}
+    model::CAVIEx.Model
 
     function InstanceDemo(;
         seed::Integer,
@@ -35,28 +32,34 @@ struct InstanceDemo
     )
         Random.seed!(seed);
         nobs = 100;
-        data = [rand(Normal(realmu, sqrt(realsigma2)), nobs)];
+        data = Distributions.rand(Normal(realmu, sqrt(realsigma2)), nobs);
 
-        hyperParams = ["α", "β", "m", "s²"];
+        params = OrderedDict(
+            :μ => (
+                Normal,
+                OrderedDict(
+                    :μ => (1, :m, Hθ -> Demo.refine_m(Y=data)),
+                    :σ => (2, :s², Hθ -> Demo.refine_s²(Hθ, Y=data)),
+                )
+            ),
+            :σ² => (
+                InverseGamma,
+                OrderedDict(
+                    :invd => (3, :α, Hθ -> Demo.refine_α(Y=data)),
+                    :θ => (4, :β, Hθ -> Demo.refine_β(Hθ, Y=data)),
+                )
+            ),
+        );
 
         new(
-            [realmu, realsigma2],
+            Dict(:realmu => realmu, :realsigma2 => realsigma2),
             data,
-            AbstractModel.BaseModel(
-                hyperParams,
+            CAVIEx.Model(
+                params,
                 θ -> Demo.logTargetDensity(θ, Y=data),
                 (θ, Hθ) -> Demo.logApproxDensity(θ, Hθ),
-                [
-                    Hθ -> Demo.μMarginal(Hθ),
-                    Hθ -> Demo.σ²Marginal(Hθ),
-                ],
-                [
-                    Hθ -> Demo.refine_α(Y=data),
-                    Hθ -> Demo.refine_β(Hθ, Y=data),
-                    Hθ -> Demo.refine_m(Y=data),
-                    Hθ -> Demo.refine_s²(Hθ, Y=data),
-                ]
-            )
+                niter -> Demo.mcmc(niter, Y=data),
+            ),
         )
     end
 

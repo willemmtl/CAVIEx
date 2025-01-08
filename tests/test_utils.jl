@@ -1,6 +1,4 @@
-using Test, Distributions
-
-include("../precipFramework/utils.jl");
+using Test
 
 @testset "utils.jl" begin
     
@@ -18,43 +16,15 @@ include("../precipFramework/utils.jl");
     end
     
     
-    @testset "findMode(f, θ₀)" begin
-        
-        f(θ::DenseVector) = pdf(MvNormal(zeros(2), I), θ);
-        θ₀ = [1.0, 1.0];
-        mode = findMode(f, θ₀);
-        
-        @test isapprox(Optim.minimizer(mode), [0, 0], atol=1e-15)
-        @test -Optim.minimum(mode) ≈ 1 / (2*pi)
+    @testset "adaptHp!(dist, values)" begin
 
-    end
+        dist = Gamma;
+        values = [1.0, 2.0];
 
+        adaptHp!(Gamma, values)
 
-    @testset "computeFisherInformation(logf, θ̂)" begin
-        
-        μ = 1.0;
-        σ² = 2.5;
+        @test values[2] == .5;
 
-        x̂ = μ; # mode
-
-        logf(θ::DenseVector) = -0.5 * log(θ[2]) - (x̂ - θ[1])^2 / (2*θ[2]);
-
-        @test computeFisherInformation(logf, [μ, σ²]) ≈ [1/σ² 0; 0 -1/(2*σ²^2)]
-    
-    end
-
-
-    @testset "computeFisherVariance(logf, θ̂)" begin
-        
-        μ = 1.0;
-        σ² = 2.5;
-
-        x̂ = μ; # mode
-
-        logf(θ::DenseVector) = -0.5 * log(θ[2]) - (x̂ - θ[1])^2 / (2*θ[2]);
-
-        @test computeFisherVariance(logf, [μ, σ²]) ≈ [σ² 0; 0 -2*σ²^2]
-    
     end
 
 end

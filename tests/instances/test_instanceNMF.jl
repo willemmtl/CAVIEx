@@ -20,8 +20,6 @@ include("../../src/instances/instanceNMF.jl");
 
         @test mean(instance.data[1]) - 10.0 < .1;
         @test var(instance.data[1]) - 1.0 < .1;
-        @test instance.model.nHyperParams == length(instance.model.refiningFunctions);
-
     end
 
 end

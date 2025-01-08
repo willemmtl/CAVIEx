@@ -1,7 +1,6 @@
-using Test, Random
+using Test
 
-include("../../src/instances/instanceDemo.jl");
-
+include("../../src/instances/InstanceDemo.jl");
 
 @testset "instanceDemo.jl" begin
     
@@ -16,9 +15,9 @@ include("../../src/instances/instanceDemo.jl");
             realsigma2=realsigma2,
         )
 
-        @test mean(instance.data[1]) - 75.0 < .1;
-        @test var(instance.data[1]) - 100.0 < .1;
-        @test instance.model.nHyperParams == length(instance.model.refiningFunctions);
+        @test mean(instance.data) - 75.0 < .1;
+        @test var(instance.data) - 100.0 < .1;
+        @test instance.model.hyperParams[:m].numero == 1;
 
     end
 

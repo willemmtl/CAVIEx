@@ -1,7 +1,19 @@
+"""
+PrecipMeanField Model.
+
+The data Xk1, ..., Xkn are drawn from GEV(μk, 1, 0).
+The location parameters μk are drawn from iGMRF(κᵤ).
+The target density is the posterior of θ = [μ..., κᵤ].
+The mean-field aproximation gives
+    μk ∼ Normal(ηk, s²k)...
+    κᵤ ∼ Gamma(aᵤ, bᵤ)
+where [..., ηk, s²k, ..., aᵤ, bᵤ] are the hyper-parameters.
+"""
+
 module PrecipMeanField
 
 using Distributions, GMRF, LinearAlgebra
-
+include("../mcmc/precipMCMC.jl");
 
 """
     logTargetDensity(θ; F, Y)
@@ -36,57 +48,14 @@ It corresponds to the sum of all marginals (mean-field approximation).
 
 # Arguments :
 - `θ::DenseVector`: Parameters -> [μ₁, ..., μₘ, κᵤ].``
-- `Hθ::DenseVector`: Hyper-parameters -> [η..., s²..., aᵤ, bᵤ].
+- `Hθ::DenseVector`: Hyper-parameters -> [η1, s²1, ..., aᵤ, bᵤ].
 - `F::iGMRF`: Spatial scheme.
 """
 function logApproxDensity(θ::DenseVector, Hθ::DenseVector; F::iGMRF)
 
     m = F.G.gridSize[1] * F.G.gridSize[2];
 
-    return logpdf(κMarginal(Hθ, F=F), θ[end]) + sum([logpdf(μMarginal(Hθ, k=k, F=F), θ[k]) for k = 1:m])
-end
-
-
-"""
-    μMarginal(Hθ; k, F)
-
-Marginal approximating distribution of μₖ.
-
-It's a Normal distribution with mean η and variance s².
-
-# Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [η..., s²..., aᵤ, bᵤ].
-- `k::Integer`: Numero of the cell.
-- `F::iGMRF`: Spatial scheme.
-"""
-function μMarginal(Hθ::DenseVector; k::Integer, F::iGMRF)
-    
-    m = F.G.gridSize[1] * F.G.gridSize[2];
-    η = Hθ[1:m];
-    s² = Hθ[m+1:2*m];
-    
-    return Normal(η[k], sqrt.(s²[k]))
-end
-
-
-"""
-    κMarginal(Hθ; F)
-
-Evaluate the marginal approximating density of κᵤ.
-
-It's a Gamma distribution with parameters aᵤ and bᵤ.
-
-# Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [η..., s²..., aᵤ, bᵤ].
-- `F::iGMRF`: Spatial scheme.
-"""
-function κMarginal(Hθ::DenseVector; F::iGMRF)
-    
-    m = F.G.gridSize[1] * F.G.gridSize[2];
-    aᵤ = Hθ[2*m+1];
-    bᵤ = Hθ[2*m+2];
-
-    return Gamma(aᵤ, 1/bᵤ)
+    return logpdf(Gamma(Hθ[2*m+1], 1/Hθ[2*m+2]), θ[end]) + sum([logpdf(Normal(Hθ[k], sqrt(Hθ[m+k])), θ[k]) for k = 1:m])
 end
 
 
@@ -98,7 +67,7 @@ Refine the mean parameter for location parameter's approximation.
 See the mathematical formula in Notion.
 
 # Arguments :
-- `Hθ::DenseVector`: Hyper-parameters [η..., s²..., aᵤ, bᵤ].
+- `Hθ::DenseVector`: Hyper-parameters [η..., s..., aᵤ, bᵤ].
 - `k::Integer`: Numero of the cell to update.
 - `F::iGMRF`: Spatial scheme.
 - `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
@@ -127,7 +96,7 @@ Refine the approximation variances for the location parameters.
 See the mathematical formula in Notion.
 
 # Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [η..., s²..., aᵤ, bᵤ].
+- `Hθ::DenseVector`: Hyper-parameters -> [η..., s..., aᵤ, bᵤ].
 - `k::Integer`: Numero of the cell to update.
 - `F::iGMRF`: Spatial scheme.
 - `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
@@ -170,7 +139,7 @@ Refine the second parameter for precision's approximation.
 See the mathematical formula in Notion.
 
 # Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [η..., s²..., aᵤ, bᵤ].
+- `Hθ::DenseVector`: Hyper-parameters -> [η..., s..., aᵤ, bᵤ].
 - `F::iGMRF`: Spatial scheme.
 """
 function refine_bᵤ(Hθ::DenseVector; F::iGMRF)
@@ -182,36 +151,36 @@ function refine_bᵤ(Hθ::DenseVector; F::iGMRF)
 end
 
 
-"""
-    initializeHyperParams(F, Y)
+# """
+#     initializeHyperParams(F, Y)
 
-Initialize hyperparameters.
+# Initialize hyperparameters.
 
-η is initialized with a quadratic approximation of the posteriori.
-b can be computed thanks to η.
+# η is initialized with a quadratic approximation of the posteriori.
+# b can be computed thanks to η.
 
-# Arguments :
-- `F::iGMRF`: Spatial scheme.
-- `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
-"""
-function initializeHyperParams(F::iGMRF, Y::Vector{Vector{Float64}})
+# # Arguments :
+# - `F::iGMRF`: Spatial scheme.
+# - `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
+# """
+# function initializeHyperParams(F::iGMRF, Y::Vector{Vector{Float64}})
 
-    m = F.G.gridSize[1] * F.G.gridSize[2];
+#     m = F.G.gridSize[1] * F.G.gridSize[2];
     
-    mode = findMode(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), [fill(0.0, m)..., 1]);
-    α = Optim.minimizer(mode);
+#     mode = findMode(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), [fill(0.0, m)..., 1]);
+#     α = Optim.minimizer(mode);
 
-    Fvar = computeFisherVariance(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), α);
+#     Fvar = computeFisherVariance(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), α);
 
-    α₀ = α[2:end]
-    S₀ = round.(Fvar[2:end, 2:end] , digits=5);
+#     α₀ = α[2:end]
+#     S₀ = round.(Fvar[2:end, 2:end] , digits=5);
 
-    η₀ = rand(MvNormal(α₀, S₀));
-    b₀ = (η₀' * F.G.W * η₀) / 2 + 1 / 100;
+#     η₀ = Distributions.rand(MvNormal(α₀, S₀));
+#     b₀ = (η₀' * F.G.W * η₀) / 2 + 1 / 100;
 
-    return [η₀..., b₀];
+#     return [η₀..., b₀];
 
-end;
+# end;
 
 
 end

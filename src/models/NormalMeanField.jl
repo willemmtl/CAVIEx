@@ -1,6 +1,7 @@
 module NormalMeanField
 
 using Distributions, GMRF
+include("../mcmc/normalMCMC.jl");
 
 
 """
@@ -43,50 +44,7 @@ function logApproxDensity(θ::DenseVector, Hθ::DenseVector; F::iGMRF)
 
     m = F.G.gridSize[1] * F.G.gridSize[2];
 
-    return logpdf(κMarginal(Hθ, F=F), θ[end]) + sum([logpdf(μMarginal(Hθ, k=k, F=F), θ[k]) for k = 1:m])
-end
-
-
-"""
-    μMarginal(Hθ; k, F)
-
-Marginal approximating distribution of μₖ.
-
-It's a Normal distribution with mean η and variance s².
-
-# Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [η..., s²..., aᵤ, bᵤ].
-- `k::Integer`: Numero of the cell.
-- `F::iGMRF`: Spatial scheme.
-"""
-function μMarginal(Hθ::DenseVector; k::Integer, F::iGMRF)
-    
-    m = F.G.gridSize[1] * F.G.gridSize[2];
-    η = Hθ[1:m];
-    s² = Hθ[m+1:2*m];
-    
-    return Normal(η[k], sqrt.(s²[k]))
-end
-
-
-"""
-    κMarginal(Hθ; F)
-
-Evaluate the marginal approximating density of κᵤ.
-
-It's a Gamma distribution with parameters aᵤ and bᵤ.
-
-# Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [η..., s²..., aᵤ, bᵤ].
-- `F::iGMRF`: Spatial scheme.
-"""
-function κMarginal(Hθ::DenseVector; F::iGMRF)
-    
-    m = F.G.gridSize[1] * F.G.gridSize[2];
-    aᵤ = Hθ[2*m+1];
-    bᵤ = Hθ[2*m+2];
-
-    return Gamma(aᵤ, 1/bᵤ)
+    return sum([logpdf(Normal(Hθ[k], sqrt(Hθ[m+k])), θ[k]) for k = 1:m]) + logpdf(Gamma(Hθ[2*m+1], 1/Hθ[2*m+2]), θ[end])
 end
 
 

@@ -1,4 +1,4 @@
-using Test, Random
+using Test, Random, Statistics
 
 include("../../src/instances/instancePMF.jl");
 
@@ -19,8 +19,8 @@ include("../../src/instances/instancePMF.jl");
         )
 
         @test instance.data[1][1] ≈ 12.215413935213412;
-        @test instance.model.nHyperParams == length(instance.model.refiningFunctions);
-
+        @test instance.gridTarget[1, 1, 2] ≈ 1.0;
+        @test instance.gridTarget[2, 2, 3] ≈ 0.0;
     end
 
 end

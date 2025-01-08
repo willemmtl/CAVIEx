@@ -1,6 +1,6 @@
-using Mamba, Distributions
+using Distributions
+using Mamba: Chains
 
-include("model.jl")
 
 """
     mcmc(n_iter; Y)
@@ -25,6 +25,9 @@ function mcmc(n_iter::Integer; Y::Vector{<:Real})
         
     end
 
-    return θ
+    names = [["μ"]; ["σ²"]];
+    sim = Chains(copy(θ'), names=names)
+
+    return sim
 
 end

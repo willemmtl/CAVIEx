@@ -1,6 +1,3 @@
-using Distributions, Optim, ForwardDiff, LinearAlgebra
-
-
 """
     evaluateLogMvDensity(f, supp)
 
@@ -16,49 +13,20 @@ end
 
 
 """
-    findMode(f, θ₀)
+    adaptHp!(dist, values)
 
-Given a density's functional form, find a mode.
-
-Warning : there may be several modes.
-This function will catch the first one it finds depending on the initialization.
+Bridge between our usual notation of law's parameters and the one in Distributions.jl.
 
 # Arguments :
-- `f::Function`: A density's functional form (can be log).
-- `θ₀::DenseVector`: Parameters' initialization.
+- `dist::UnionAll`: A distribution's name.
+- `values::DenseVector`: The values of the parameters as we usually write them.
 """
-function findMode(f::Function, θ₀::DenseVector)
-    F(θ::DenseVector) = -f(θ)
-    return optimize(F, θ₀, Newton(); autodiff = :forward)
-end;
+function adaptHp!(dist::UnionAll, values::DenseVector)
 
+    if dist == Normal
+        values[2] = sqrt(values[2]);
+    elseif dist == Gamma
+        values[2] = 1 / values[2];
+    end
 
-"""
-    computeFisherVariance(logf, θ̂)
-
-Compute the quadratic approximation variance matrix of a given distribution.
-It is based on the Fisher information.
-
-The link is Σ = F⁻¹ where F is the Fisher information matrix.
-
-# Arguments :
-- `logf::Function`: log the density's functional form.
-- `θ̂::AbstractArray`: mode of the distribution.
-"""
-function computeFisherVariance(logf::Function, θ̂::AbstractArray)
-    return inv(computeFisherInformation(θ -> logf(θ), θ̂))
 end
-
-
-"""
-    computeFisherInformation(logf, θ̂)
-
-Compute the Fisher information matrix of a given distribution.
-
-# Arguments :
-- `logf::Function`: log the density's functional form.
-- `θ̂::AbstractArray`: mode of the distribution.
-"""
-function computeFisherInformation(logf::Function, θ̂::AbstractArray)
-    return - ForwardDiff.hessian(logf, θ̂)
-end;

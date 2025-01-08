@@ -55,8 +55,11 @@ using .PrecipMeanField
     
     @testset "refine_η(η, aᵤ, bᵤ; F, Y)" begin
         
-        Y = [float.([i*2, i*2+1]) for i = 0:8];
-        F = iGMRF(3, 3, 1, NaN);
+        m₁ = 3;
+        m₂ = 3;
+        m = m₁ * m₂;
+        Y = [float.([i*2, i*2+1]) for i = 0:m];
+        F = iGMRF(m₁, m₂, 1, NaN);
         Hθ = [
             [float(i) for i = 1:9]...,
             ones(9)...,

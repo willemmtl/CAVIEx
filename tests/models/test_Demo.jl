@@ -1,4 +1,4 @@
-using Test, GMRF
+using Test
 
 if !isdefined(Main, :Demo)
     include("../../src/models/Demo.jl");
@@ -8,7 +8,7 @@ using .Demo
 @testset "Demo.jl" begin
 
     Y = [float(i) for i = 1:4];
-    Hθ = [1.0, 1.0, 0.0, 1.0];
+    Hθ = [0.0, 1.0, 1.0, 1.0];
 
     @testset "logTargetDensity(θ; Y)" begin
         

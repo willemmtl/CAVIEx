@@ -1,11 +1,5 @@
 using Gadfly
 
-if !isdefined(Main, :AbstractModel)
-    include("../src/models/AbstractModel.jl");
-end
-using .AbstractModel
-
-
 """
     plotConvergenceCriterion(MCKL)
 
@@ -51,7 +45,7 @@ function plotConvergenceCriterion(MCKL::DenseVector, path::String)
         Guide.ylabel("KL divergence"),
     )
 
-    draw(PNG(path, dpi=300), p)
+    Gadfly.draw(PNG(path, dpi=300), p)
 end
 
 
@@ -61,17 +55,17 @@ end
 Plot evolution of a given hyper-parameter over CAVI iterations.
 
 # Arguments
-- `model::AbstractModel.BaseModel`: Model.
-- `hyperParam::String`: Hyper-parameter name as it is written in the model.
+- `model::Model`: Model.
+- `hyperParam::Symbol`: Hyper-parameter name as it is written in the model.
 """
-function plotTrace(model::AbstractModel.BaseModel, hyperParam::String)
+function plotTrace(model::Model, hyperParam::Symbol)
     
-    if isnothing(model.hyperParamsTrace[hyperParam])
+    if isnothing(model.hyperParams[hyperParam].trace)
         error("Aucune trace n'est disponible !")
     end
 
-    n_values = length(model.hyperParamsTrace[hyperParam]);
-    values = model.hyperParamsTrace[hyperParam];
+    n_values = length(model.hyperParams[hyperParam].trace);
+    values = model.hyperParams[hyperParam].trace;
 
     plot(
         layer(x=1:n_values, y=values, Geom.line),
@@ -90,25 +84,20 @@ end
 Plot the approximative density function against the sampled posterior density obtained by MCMC.
 
 # Arguments
-- `approxDensity::Function`: approximative density function (univariate).
-- `MCMCsample::DenseVector`: samples of the posterior density obtained by MCMC.
-- `a::Real`: beginning of the x axis.
-- `b::Real`: end of the x axis.
-- `step::Real`: resolution of the plot.
-- `xLabel::String`: label of the x axis.
-- `yLabel::String`: label of the y axis.
+TBD.
 """
 function plotApproxVSMCMC(
-    approxDensity::Function,
-    MCMCsample::DenseVector;
+    model::Model,
+    paramName::Symbol,
     a::Real,
     b::Real,
     step::Real,
-    xLabel::String,
-    yLabel::String,
 )
+    param = model.params[paramName];
+    MCMCsample = param.mcmcSample[param.warmingSize:end];
     
     x = a:step:b;
+    approxDensity(x::Real) = pdf(param.approxMarginal, x);
 
     plot(
         layer(x=x, y=approxDensity.(x), Geom.line, Theme(default_color="red")),
@@ -116,8 +105,8 @@ function plotApproxVSMCMC(
         Guide.manual_color_key("Legend", ["Approximation", "Posteriori"], ["red", "deepskyblue"]),
         Theme(background_color="white"),
         Guide.title("Approx vs MCMC"),
-        Guide.xlabel(xLabel),
-        Guide.ylabel(yLabel),
+        Guide.xlabel(String(paramName)),
+        Guide.ylabel("Density"),
     )
 end
 
@@ -128,37 +117,32 @@ end
 Plot AND STORE the approximative density function against the sampled posterior density obtained by MCMC.
 
 # Arguments
-- `approxDensity::Function`: approximative density function (univariate).
-- `MCMCsample::DenseVector`: samples of the posterior density obtained by MCMC.
-- `path::String`: where to store the plot.
-- `a::Real`: beginning of the x axis.
-- `b::Real`: end of the x axis.
-- `step::Real`: resolution of the plot.
-- `xLabel::String`: label of the x axis.
-- `yLabel::String`: label of the y axis.
+TBD.
 """
 function plotApproxVSMCMC(
-    approxDensity::Function,
-    MCMCsample::DenseVector,
-    path::String;
+    model::Model,
+    paramName::Symbol,
     a::Real,
     b::Real,
     step::Real,
-    xLabel::String,
-    yLabel::String,
+    path::String,
 )
     
-    x = a:step:b;
+    param = model.params[paramName];
+    MCMCsample = param.mcmcSample[param.warmingSize:end];
 
-    p = plot(
+    x = a:step:b;
+    approxDensity(x::Real) = pdf(param.approxMarginal, x);
+
+    plot(
         layer(x=x, y=approxDensity.(x), Geom.line, Theme(default_color="red")),
         layer(x=MCMCsample, Geom.histogram(density=true)),
         Guide.manual_color_key("Legend", ["Approximation", "Posteriori"], ["red", "deepskyblue"]),
         Theme(background_color="white"),
         Guide.title("Approx vs MCMC"),
-        Guide.xlabel(xLabel),
-        Guide.ylabel(yLabel),
+        Guide.xlabel(String(paramName)),
+        Guide.ylabel("Density"),
     )
 
-    draw(PNG(path, dpi=300), p)
+    Gadfly.draw(PNG(path, dpi=300), p)
 end

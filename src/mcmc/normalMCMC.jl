@@ -1,10 +1,9 @@
-using Mamba
+using GMRF, SparseArrays, LinearAlgebra
+using Mamba: Chains
 using Distributions: loglikelihood
 
-include("iGMRF.jl")
-
 """
-    gibbs(niter, y; δ², κᵤ₀, μ₀, W)
+    gibbs(niter, y; m₁, m₂, δ², κᵤ₀, μ₀)
 
 Perform bayesian inference through Gibbs algorithm.
 
@@ -32,16 +31,16 @@ function gibbs(niter::Integer, y::Vector{Vector{Float64}}; m₁::Integer, m₂::
 
     for j = 2:niter
         # Generate μᵢ | κᵤ, μ₋ᵢ
-        F = iGMRF(m₁, m₂, κᵤ[j-1])
+        F = iGMRF(m₁, m₂, 1, κᵤ[j-1])
         μ[:, j] = updateμ(F, μ, j, δ²=δ², y=y)
         # Generate κᵤ
         κᵤ[j] = rand(fcκᵤ(μ[:, j], W=F.G.W))
     end
 
     # Concatenate κᵤ's and μ's traces
-    θ = vcat(reshape(κᵤ, (1, size(κᵤ, 1))), μ)
+    θ = vcat(μ, reshape(κᵤ, (1, size(κᵤ, 1))))
     # Build the Chains object
-    names = [["κᵤ"]; ["μ$i" for i=1:m]]
+    names = [["μ$i" for i=1:m]; ["κᵤ"]]
     sim = Chains(copy(θ'), names=names)
 
     return sim
@@ -67,8 +66,8 @@ function updateμ(F::iGMRF, μ::Matrix{<:Real}, j::Integer; δ²::Real, y::Vecto
     μ̃ = rand.(Normal.(μꜝ, δ²))
 
     logL = datalevelloglike.(μ̃, y) - datalevelloglike.(μꜝ, y)
-    for j in eachindex(F.G.condIndSubsets)
-        ind = F.G.condIndSubsets[j]
+    for j in eachindex(F.G.condIndSubset)
+        ind = F.G.condIndSubset[j]
         accepted = subsetMetropolis(F, μꜝ, μ̃, logL, ind)
         setindex!(μꜝ, μ̃[ind][accepted], ind[accepted])
     end
@@ -116,7 +115,7 @@ Compute the log-likelihhod at the data level evaluated at `μ` knowing the obser
 """
 function datalevelloglike(μ::Real, y::Vector{<:Real})
 
-    return loglikelihood(GeneralizedExtremeValue(μ, 1.0, 0.0), y)
+    return loglikelihood(Normal(μ, 1.0), y)
 
 end
 
@@ -133,8 +132,8 @@ Compute the probability density of the full conditional function of the GEV's lo
 """
 function fcIGMRF(F::iGMRF, μ::Vector{<:Real})
 
-    Q = F.κᵤ * Array(diag(F.G.W))
-    b = -F.κᵤ * (F.G.W̄ * μ)
+    Q = F.κ * Array(diag(F.G.W))
+    b = -F.κ * (F.G.W̄ * μ)
 
     return NormalCanon.(b, Q)
 
