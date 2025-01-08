@@ -1,3 +1,15 @@
+"""
+Instance of the NormalMeanField Model.
+
+The data Xk1, ..., Xkn are drawn from Normal(μk, 1, 0).
+The location parameters μk are drawn from iGMRF(κᵤ).
+The target density is the posterior of θ = [μ..., κᵤ].
+The mean-field aproximation gives
+    μk ∼ Normal(ηk, s²k)
+    κᵤ ∼ Gamma(aᵤ, bᵤ)
+where [η..., s²..., aᵤ, bᵤ] are the hyper-parameters.
+"""
+
 using GMRF, OrderedCollections
 
 if !isdefined(Main, :CAVIEx)
@@ -22,7 +34,7 @@ Generate an instance of a NormalMeanField model.
 - `F::iGMRF`: Spatial scheme.
 - `gridTarget::Array{Float64, 3}`: True values of μ.
 - `data::Vector{Vector{<:Real}}`: Extreme values for each cell.
-- `model::CAVIEx.Model`: TBD.
+- `model::CAVIEx.Model`: Normal Mean-Field configurations.
 """
 struct InstanceNMF
     F::iGMRF
@@ -30,6 +42,16 @@ struct InstanceNMF
     data::Vector{Vector{<:Real}}
     model::CAVIEx.Model
 
+    """
+    Constructor.
+
+    # Arguments
+    - `m₁::Integer`: Number of rows of the grid.
+    - `m₂::Integer`: Number of columns of the grid.
+    - `seed::Integer`: Seed for data and true parameters generation.
+    - `biasmu::Float64`: Value around which the true mean parameters are generated.
+    - `realkappa::Float64`: True precision parameter of the iGMRF.
+    """
     function InstanceNMF(
         m₁::Integer,
         m₂::Integer;

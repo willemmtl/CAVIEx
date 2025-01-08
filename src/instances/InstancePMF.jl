@@ -1,3 +1,15 @@
+"""
+Instance of the PrecipMeanField Model.
+
+The observations Xk1, ..., Xkn are drawn from GEV(μk, 1, 0).
+The location parameters μk are drawn from iGMRF(κᵤ).
+The target density is the posterior of θ = [μ..., κᵤ].
+The mean-field aproximation gives
+    μk ∼ Normal(ηk, s²k)...
+    κᵤ ∼ Gamma(aᵤ, bᵤ)
+where [..., ηk, s²k, ..., aᵤ, bᵤ] are the hyper-parameters.
+"""
+
 using GMRF, OrderedCollections
 
 if !isdefined(Main, :CAVIEx)
@@ -20,9 +32,9 @@ Generate an instance of a PrecipMeanField model.
 
 # Attributes :
 - `F::iGMRF`: Spatial scheme.
-- `gridTarget::Array{Float64, 3}`: True values of μ.
+- `gridTarget::Array{Float64, 3}`: True values of μ, σ and ξ.
 - `data::Vector{Vector{<:Real}}`: Extreme values for each cell.
-- `model::CAVIEx.Model`: TBD.
+- `model::CAVIEx.Model`: Precip Mean-Field configurations.
 """
 struct InstancePMF
     F::iGMRF
@@ -30,6 +42,16 @@ struct InstancePMF
     data::Vector{Vector{<:Real}}
     model::CAVIEx.Model
 
+    """
+    Constructor.
+
+    # Arguments
+    - `m₁::Integer`: Number of rows of the grid.
+    - `m₂::Integer`: Number of columns of the grid.
+    - `seed::Integer`: Seed for data and true parameters generation.
+    - `biasmu::Float64`: Value around which the true location parameters are generated.
+    - `realkappa::Float64`: True precision parameter of the iGMRF.
+    """
     function InstancePMF(
         m₁::Integer,
         m₂::Integer;

@@ -1,3 +1,14 @@
+"""
+Instance of the Demo Model.
+
+The data are X1, ..., Xn drawn from Normal(μ, σ²)
+The target density is the posterior of θ = [μ, σ²].
+The mean-field aproximation gives
+    μ ∼ Normal(m, s²)
+    σ² ∼ InverseGamma(α, β)
+where [m, s², α, β] are the hyper-parameters.
+"""
+
 using Distributions, Random, OrderedCollections
 
 if !isdefined(Main, :CAVIEx)
@@ -18,13 +29,21 @@ Generate an instance of a Demo model.
 # Attributes :
 - `realParams::DenseVector`: True values of μ and σ².
 - `data::Vector{Vector{<:Real}}`: Sample from the real distribution.
-- `model::CAVIEx.Model`: Generic model.
+- `model::CAVIEx.Model`: Demo configurations.
 """
 struct InstanceDemo
     realParams::Dict{Symbol, Float64}
     data::Vector{<:Real}
     model::CAVIEx.Model
 
+    """
+    Constructor.
+
+    # Arguments
+    - `seed::Integer`: Seed for data and true parameters generation.
+    - `realmu::Float64`: True mean parameter.
+    - `realsigma2::Float64`: True variance parameter.
+    """
     function InstanceDemo(;
         seed::Integer,
         realmu::Float64,
