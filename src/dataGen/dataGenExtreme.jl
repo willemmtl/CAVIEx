@@ -1,38 +1,61 @@
 using Random, Distributions, SparseArrays, GMRF
 
-function generateData(grid_params::Array{<:Real}, nobs::Integer)
+"""
+    generateData(grid_params, nobs)
 
-    # Vecteur qui contiendra les observations pour chaque cellule
+Generate fake observations for every grid cell from a given grid of parameters.
+
+# Arguments
+- `grid_params::Array{Float64, 3}`: Concatenated grids of values for each parameter of the GEV.
+- `nobs::Integer`: Number of fake observations to generate.
+"""
+function generateData(grid_params::Array{Float64, 3}, nobs::Integer)
+
     Y = Vector{Float64}[]
 
     for i = 1:size(grid_params, 1)
         for j = 1:size(grid_params, 2)
-            # Récupération des paramètres de la cellule courante
-            gev_params = grid_params[i, j, :]
-            # Génération des observations pour la cellule courante
-            y = rand(GeneralizedExtremeValue(gev_params...), nobs)
-            push!(Y, y)
+            gev_params = grid_params[i, j, :];
+            y = rand(GeneralizedExtremeValue(gev_params...), nobs);
+            push!(Y, y);
         end
     end
 
     return Y
 end
 
+
+"""
+    generateTargetGrid(F)
+
+Create the grids of values for each parameter of the GEV.
+
+For now the log-scale (ϕ) is fixed to 1 and form (ξ) to 0.
+
+# Arguments
+- `F::iGMRF`: Prior of the location parameters.
+"""
 function generateTargetGrid(F::iGMRF)
-    # Paramètre de position
-    μ = generateParams(F)
-    # Paramètre d'échelle
-    ϕ = zeros(F.G.gridSize...)
-    # Paramètre de forme
-    ξ = zeros(F.G.gridSize...)
-    # Concatène les paramètres pour former la grille finale m₁xm₂x3
+    
+    μ = generateParams(F);
+    ϕ = zeros(F.G.gridSize...);
+    ξ = zeros(F.G.gridSize...);
+    
     return cat(μ, exp.(ϕ), ξ, dims=3)
 end
 
+
+"""
+    generateParams(F::iGMRF)
+
+Return a sample of a given iGMRF and reshape it to create a grid of true values for a given GEV parameter.
+
+# Arguments
+- `F::iGMRF`: The iGMRF to sample from.
+"""
 function generateParams(F::iGMRF)
-    # Génère les effets spatiaux
-    s = rand(F)
-    # Il n'y a pas de variable explicative
-    # On renvoie donc directement les effets spatiaux
+    
+    s = rand(F);
+    
     return reshape(s, F.G.gridSize...)'
 end
