@@ -106,7 +106,7 @@ end
 """
     datalevelloglike(μ, y)
 
-Compute the log-likelihhod at the data level evaluated at `μ` knowing the observations `y`.
+Compute the log-likelihood at the data level evaluated at `μ` knowing the observations `y`.
 
 # Arguments
 
