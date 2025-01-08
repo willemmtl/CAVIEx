@@ -7,7 +7,7 @@ include("../HyperParam.jl");
 """
     Model
 
-
+Generic model for the CAVIEx algorithm.
 
 # Attributes :
 - `params::OrderedDict{Symbol, Param}`: Parameters that we're trying to estimate.
@@ -49,6 +49,8 @@ struct Model
                 }
             )
         )}
+        WARNING : the order in which parameters are placed in the dictionnary 
+        reflects the order in which they will be refined during the refining process (see CAVI).
     - `logTargetDensity::Function`: Density that we're trying to approximate.
         Must be of the forme θ::Vector -> f(θ)
     - `logApproxDensity::Function`: Approximating density.
