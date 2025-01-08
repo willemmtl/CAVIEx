@@ -9,7 +9,7 @@ include("../HyperParam.jl");
 
 Generic model for the CAVIEx algorithm.
 
-# Attributes :
+# Attributes
 - `params::OrderedDict{Symbol, Param}`: Parameters that we're trying to estimate.
 - `nParams::Integer`: Number of parameters.
 - `hyperParams::OrderedDict{Symbol, HyperParam}`: Hyper-parameters that define approximation densities.
