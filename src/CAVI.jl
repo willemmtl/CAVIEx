@@ -10,11 +10,11 @@ Run the CAVI algorithm over the given model.
 
 Initial values must be entered by the user.
 
-# Arguments :
+# Arguments
 - `n_epoch::Integer`: Number of epochs to compute i.e. number of type we'll compute the convergence criterion.
 - `epoch_size::Integer`: Size of each epoch i.e. number of iterations before computing the convergence criterion.
 - `hp0::DenseVector`: Initial values of the hyper-parameters.
-- `model::Model`: Object containing the target, approximation and updating functions and data.
+- `model::Model`: Model's configuration.
 """
 function runCAVI(n_epoch::Integer, epoch_size::Integer, hp0::DenseVector, model::Model)
 
@@ -45,6 +45,9 @@ end;
     checkIfClear(model)
 
 Check whether the model is clear before running CAVI.
+
+# Arguments
+- `model::Model`: Model's configuration.
 """
 function checkIfClear(model::Model)
 
@@ -66,6 +69,9 @@ end
     MonteCarloKL(model)
 
 Compute the convergence criterion with current hyper-parameters.
+
+# Arguments
+- `model::Model`: Model's configuration.
 """
 function MonteCarloKL(model::Model)
     
@@ -91,7 +97,7 @@ Update approximation parameters.
 Correspond to one iteration in an epoch of the CAVI algorithm.
 
 # Arguments :
-- `model::Model`: TBD.
+- `model::Model`: Model's configuration.
 """
 function refineHyperParams!(model::Model)
 

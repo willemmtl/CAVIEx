@@ -1,7 +1,7 @@
 """
-PrecipMeanField Model.
+Specific functions for the PrecipMeanField Model.
 
-The data Xk1, ..., Xkn are drawn from GEV(μk, 1, 0).
+The observations Xk1, ..., Xkn are drawn from GEV(μk, 1, 0).
 The location parameters μk are drawn from iGMRF(κᵤ).
 The target density is the posterior of θ = [μ..., κᵤ].
 The mean-field aproximation gives
@@ -23,7 +23,7 @@ Evaluate the log functional form of the posterior distribution of our hierarchic
 # Arguments :
 - `θ::DenseVector`: Parameters of interest -> [μ..., κᵤ].
 - `F::iGMRF`: Spatial scheme.
-- `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
+- `Y::Vector{Vector{Float64}}`: Extreme observations for each cell.
 """
 function logTargetDensity(θ::DenseVector; F::iGMRF, Y::Vector{Vector{Float64}})
     
@@ -70,7 +70,7 @@ See the mathematical formula in Notion.
 - `Hθ::DenseVector`: Hyper-parameters [η..., s..., aᵤ, bᵤ].
 - `k::Integer`: Numero of the cell to update.
 - `F::iGMRF`: Spatial scheme.
-- `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
+- `Y::Vector{Vector{Float64}}`: Extreme observations for each cell.
 """
 function refine_η(Hθ::DenseVector, k::Integer; F::iGMRF, Y::Vector{Vector{Float64}})
     
@@ -99,7 +99,7 @@ See the mathematical formula in Notion.
 - `Hθ::DenseVector`: Hyper-parameters -> [η..., s..., aᵤ, bᵤ].
 - `k::Integer`: Numero of the cell to update.
 - `F::iGMRF`: Spatial scheme.
-- `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
+- `Y::Vector{Vector{Float64}}`: Extreme observations for each cell.
 """
 function refine_s²(Hθ::DenseVector, k::Integer; F::iGMRF, Y::Vector{Vector{Float64}})
         
@@ -161,7 +161,7 @@ end
 
 # # Arguments :
 # - `F::iGMRF`: Spatial scheme.
-# - `Y::Vector{Vector{Float64}}`: Extreme data for each cell.
+# - `Y::Vector{Vector{Float64}}`: Extreme observations for each cell.
 # """
 # function initializeHyperParams(F::iGMRF, Y::Vector{Vector{Float64}})
 

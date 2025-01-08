@@ -7,10 +7,20 @@ include("../HyperParam.jl");
 """
     Model
 
+
+
 # Attributes :
-- `params::OrderedDict{Symbol, Param}`: Parameters that we're trying to approxiate.
+- `params::OrderedDict{Symbol, Param}`: Parameters that we're trying to estimate.
+- `nParams::Integer`: Number of parameters.
 - `hyperParams::OrderedDict{Symbol, HyperParam}`: Hyper-parameters that define approximation densities.
-- `pHp::OrderedDict{Symbol, OrderedDict{Symbol, Symbol}}`: Hold the relation between parameters and hyperParameters.
+- `nHyperParams::Integer`: Number of hyper-parameters.
+- `pHp::OrderedDict{Symbol, OrderedDict{Symbol, Symbol}}`: Relation between parameters and hyperParameters.
+- `logTargetDensity::Function`: Density that we're trying to approximate.
+    Must be of the forme θ::Vector -> f(θ)
+- `logApproxDensity::Function`: Approximating density.
+    Must be of the forme (θ::Vector, Hθ::Vector) -> f(θ, Hθ)
+- `mcmcSampler::Function`: MCMC algorithm to imitate the target density.
+    Must be of the form n_iter -> f(n_iter)
 """
 struct Model
     params::OrderedDict{Symbol, Param}
@@ -22,6 +32,30 @@ struct Model
     logApproxDensity::Function
     mcmcSampler::Function
 
+    """
+    Constructor.
+
+    # Arguments
+    - `parameters::OrderedDict{Symbol, Tuple{UnionAll, OrderedDict{Symbol, Tuple{Int64, Symbol, Function}}}}`:
+        Ordered dictionnary containing { 
+            :param's symbol in our model => (
+                The law of its marginal approximating distribution (e.g. Normal),
+                Another ordered dict containing the hyperparameters' information i.e. {
+                    :the conventional symbol for the hyper-parameter in the Distribution package => (
+                        numero of the hyper-parameter,
+                        :hyper-param's symbol in our model,
+                        its refining function,
+                    )
+                }
+            )
+        )}
+    - `logTargetDensity::Function`: Density that we're trying to approximate.
+        Must be of the forme θ::Vector -> f(θ)
+    - `logApproxDensity::Function`: Approximating density.
+        Must be of the forme (θ::Vector, Hθ::Vector) -> f(θ, Hθ)
+    - `mcmcSampler::Function`: MCMC algorithm to imitate the target density.
+        Must be of the form n_iter -> f(n_iter)                    
+    """
     function Model(
         parameters::OrderedDict{Symbol, Tuple{UnionAll, OrderedDict{Symbol, Tuple{Int64, Symbol, Function}}}},
         logTargetDensity::Function,
@@ -54,7 +88,11 @@ struct Model
 
     Gather all the parameters from the `parameters` dictionnary.
 
-    # Return :
+    # Arguments
+    - `parameters`: Ordered dict containing all the information on parameters and hyper-parameters.
+        See details in the constructor signature.
+    
+    # Return
     A dictionnary with the form name => Parameter(approxMarginal, num=num).
     """
     function isolateParams(parameters::OrderedDict{Symbol, Tuple{UnionAll, OrderedDict{Symbol, Tuple{Int64, Symbol, Function}}}})
@@ -67,6 +105,10 @@ struct Model
 
     Gather all the hyper-parameters from the `parameters` dictionnary.
     
+    # Arguments
+    - `parameters`: Ordered dict containing all the information on parameters and hyper-parameters.
+        See details in the constructor signature.
+
     # Return :
     A dictionnary with the form hpName => HyperParameter(refiningFunction, num=num).
     """
@@ -86,6 +128,10 @@ struct Model
         mapParamsToHyperParams(parameters)
 
     Map the parameters with the according hyper-parameters from the `parameters` dictionnary.
+
+    # Arguments
+    - `parameters`: Ordered dict containing all the information on parameters and hyper-parameters.
+        See details in the constructor signature.
 
     # Return :
     A nested dictionnary of the form name => Dict(fieldName => hpName).
@@ -111,7 +157,7 @@ Assign the given initial values to the given hyper-parameters.
 Synchronize the parameters' approximating marginals.
 
 # Arguments :
-- `hp0::DenseVector`: the initial values to assign.
+- `hp0::DenseVector`: Initial values to assign IN THE SAME ORDER as the hyperparameters' NUMERO.
 """
 function initialize!(model::Model, hp0::DenseVector)
 
@@ -150,7 +196,7 @@ end
 """
     syncMarginals!(model)
 
-Reset each approximating marginal distribution with the current value of each hyper-parameter.
+Update each approximating marginal distribution with the current value of the hyper-parameters.
 """
 function syncMarginals!(model::Model)
 
@@ -172,7 +218,7 @@ end
 """
     getConventionalFieldNames(dist)
 
-Allow to know what a distribution's parameters are called in the Distributions package.
+Give the symbols of a distribution's parameters as they are in the Distributions package.
 
 # Arguments :
 - `dist::UnionAll`: the Distribution whose field names we want.
@@ -185,7 +231,10 @@ end
 """
     getHpValues(model)
 
-Collect the current value of each hyper-parameter in the right order.
+Collect the current value of each hyper-parameter in the right order (i.e. numero in ascending order).
+
+# Return
+Vector containing the current values.
 """
 function getHpValues(model::Model)
 
@@ -202,12 +251,12 @@ end
 """
     runMCMC!(model)
 
-Generate samples from the real target density through MCMC.
+Generate samples from the real target density through the model's MCMC algorithm.
 
-Store the samples in the corresponding params.
+Store each sample in its corresponding param.
 
 # Arguments :
-- `niter::Integer`: Number of samples per parameter.
+- `niter::Integer`: Number of MCMC iterations.
 """
 function runMCMC!(model::Model, niter::Integer)
     chains = model.mcmcSampler(niter)

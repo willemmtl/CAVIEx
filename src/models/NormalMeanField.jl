@@ -1,3 +1,15 @@
+"""
+Specific functions for the NormalMeanField Model.
+
+The data Xk1, ..., Xkn are drawn from Normal(μk, 1, 0).
+The location parameters μk are drawn from iGMRF(κᵤ).
+The target density is the posterior of θ = [μ..., κᵤ].
+The mean-field aproximation gives
+    μk ∼ Normal(ηk, s²k)
+    κᵤ ∼ Gamma(aᵤ, bᵤ)
+where [η..., s²..., aᵤ, bᵤ] are the hyper-parameters.
+"""
+
 module NormalMeanField
 
 using Distributions, GMRF
@@ -12,7 +24,7 @@ Evaluate the log functional form of the posterior distribution of our hierarchic
 # Arguments :
 - `θ::DenseVector`: Parameters of interest -> [μ..., κᵤ].
 - `F::iGMRF`: Spatial scheme.
-- `Y::Vector{Vector{Float64}}`: Vector of observations for each cell.
+- `Y::Vector{Vector{Float64}}`: Observations for each cell.
 """
 function logTargetDensity(θ::DenseVector; F::iGMRF, Y::Vector{Vector{Float64}})
     

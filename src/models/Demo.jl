@@ -1,5 +1,5 @@
 """
-Demonstration Model.
+Specific functions for the Demo Model.
 
 The data are X1, ..., Xn drawn from Normal(μ, σ²)
 The target density is the posterior of θ = [μ, σ²].
@@ -20,7 +20,9 @@ include("../mcmc/demoMCMC.jl");
 
 Log target density : posterior of Normal likelihood + Jeffreys priors.
 
-# Arguments : TBD
+# Arguments :
+- `θ::DenseVector`: Parameters [μ, σ²].
+- `Y::Vector{<:Real}`: Sample drawn from Normal(μ, σ²).
 """
 function logTargetDensity(θ::DenseVector; Y::Vector{<:Real})
     
@@ -33,7 +35,9 @@ end
 """
     logApproxDensity(θ, Hθ)
 
-# Arguments : TBD
+# Arguments :
+- `θ::DenseVector`: Parameters [μ, σ²].
+- `Hθ::DenseVector`: Hyper-parameters [m, s², α, β].
 """
 function logApproxDensity(θ::DenseVector, Hθ::DenseVector)
     return logpdf(Normal(Hθ[1], sqrt(Hθ[2])), θ[1]) + logpdf(InverseGamma(Hθ[3], Hθ[4]), θ[2])
@@ -46,7 +50,7 @@ end
 Compute the first parameter of σ²'s approximation.
 
 # Arguments :
-- `Y::Vector{Float64}`:Sample.
+- `Y::Vector{<:Real}`: Sample drawn from Normal(μ, σ²).
 """
 function refine_α(; Y::Vector{Float64})
     return length(Y)/2
@@ -59,8 +63,8 @@ end
 Compute the second parameter of σ²'s approximation.
 
 # Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [m, s², α, β].
-- `Y::Vector{Float64}`: Sample.
+- `Hθ::DenseVector`: Hyper-parameters [m, s², α, β].
+- `Y::Vector{<:Real}`: Sample drawn from Normal(μ, σ²).
 """
 function refine_β(Hθ::DenseVector; Y::Vector{Float64})
     
@@ -77,7 +81,7 @@ end
 Compute the mean of μ's approximation.
 
 # Arguments :
-- `Y::Vector{Float64}`: Sample.
+- `Y::Vector{<:Real}`: Sample drawn from Normal(μ, σ²).
 """
 function refine_m(; Y::Vector{Float64})
     return mean(Y)
@@ -90,7 +94,8 @@ end
 Compute the variance of μ's approximation.
 
 # Arguments :
-- `Hθ::DenseVector`: Hyper-parameters -> [m, s², α, β].
+- `Hθ::DenseVector`: Hyper-parameters [m, s², α, β].
+- `Y::Vector{<:Real}`: Sample drawn from Normal(μ, σ²).
 """
 function refine_s²(Hθ::DenseVector; Y::Vector{Float64})
     
