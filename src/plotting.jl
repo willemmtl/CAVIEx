@@ -84,7 +84,11 @@ end
 Plot the approximative density function against the sampled posterior density obtained by MCMC.
 
 # Arguments
-TBD.
+- `model::Model`: The model after CAVI has been run.
+- `paramName::Symbol`: Parameter name as it is written in the model.
+- `a::Real`: Left bound for the approximating marginal.
+- `b::Real`: Right bound for the approximating marginal.
+- `step::Real`: Precision of the approximating marginal plot.
 """
 function plotApproxVSMCMC(
     model::Model,
@@ -117,7 +121,12 @@ end
 Plot AND STORE the approximative density function against the sampled posterior density obtained by MCMC.
 
 # Arguments
-TBD.
+- `model::Model`: The model after CAVI has been run.
+- `paramName::Symbol`: Parameter name as it is written in the model.
+- `a::Real`: Left bound for the approximating marginal.
+- `b::Real`: Right bound for the approximating marginal.
+- `step::Real`: Precision of the approximating marginal plot.
+- `path::String`: Where to store the plot.
 """
 function plotApproxVSMCMC(
     model::Model,
