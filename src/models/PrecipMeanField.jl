@@ -151,37 +151,4 @@ function refine_bᵤ(Hθ::DenseVector; F::iGMRF)
     return 0.5 * η' * F.G.W * η + 0.01
 end
 
-
-# """
-#     initializeHyperParams(F, Y)
-
-# Initialize hyperparameters.
-
-# η is initialized with a quadratic approximation of the posteriori.
-# b can be computed thanks to η.
-
-# # Arguments :
-# - `F::iGMRF`: Spatial scheme.
-# - `Y::Vector{Vector{Float64}}`: Extreme observations for each cell.
-# """
-# function initializeHyperParams(F::iGMRF, Y::Vector{Vector{Float64}})
-
-#     m = F.G.gridSize[1] * F.G.gridSize[2];
-    
-#     mode = findMode(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), [fill(0.0, m)..., 1]);
-#     α = Optim.minimizer(mode);
-
-#     Fvar = computeFisherVariance(θ -> logFunctionalFormPosterior(θ, F=F, Y=Y), α);
-
-#     α₀ = α[2:end]
-#     S₀ = round.(Fvar[2:end, 2:end] , digits=5);
-
-#     η₀ = Distributions.rand(MvNormal(α₀, S₀));
-#     b₀ = (η₀' * F.G.W * η₀) / 2 + 1 / 100;
-
-#     return [η₀..., b₀];
-
-# end;
-
-
 end
