@@ -1,4 +1,4 @@
-using Gadfly
+using Gadfly, Cairo, Fontconfig
 
 """
     plotConvergenceCriterion(MCKL)
@@ -143,7 +143,7 @@ function plotApproxVSMCMC(
     x = a:step:b;
     approxDensity(x::Real) = pdf(param.approxMarginal, x);
 
-    plot(
+    p = plot(
         layer(x=x, y=approxDensity.(x), Geom.line, Theme(default_color="red")),
         layer(x=MCMCsample, Geom.histogram(density=true)),
         Guide.manual_color_key("Legend", ["Approximation", "Posteriori"], ["red", "deepskyblue"]),
