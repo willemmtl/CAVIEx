@@ -2,7 +2,8 @@
 Specific functions for the PrecipMeanField Model.
 
 The observations Xk1, ..., Xkn are drawn from GEV(μk, 1, 0).
-The location parameters μk are drawn from iGMRF(κᵤ).
+The location parameters μk follow iGMRF(κᵤ).
+The precision parameter κᵤ follows Gamma(1, 1/100).
 The target density is the posterior of θ = [μ..., κᵤ].
 The mean-field aproximation gives
     μk ∼ Normal(ηk, s²k)...
