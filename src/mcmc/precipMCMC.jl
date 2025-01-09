@@ -152,32 +152,10 @@ Compute the probability density of the full conditional function of the iGMRF's 
 """
 function fcκᵤ(μ::Vector{<:Real}; W::SparseMatrixCSC)
 
-    μ̄ = neighborsMutualEffect(W, μ)
-
-    m = size(μ, 1)
-    α = m / 2 + 1
-    β = sum(dot(diag(W), (μ .- μ̄) .^ 2)) / 2 + 1 / 100
+    m = size(μ, 1);
+    α = m / 2 + 1;
+    β = 0.5 * μ' * W * μ + 0.01;
 
     return Gamma(α, 1 / β)
-
-end
-
-
-"""
-    neighborsMutualEffect(W, u)
-
-Compute the neighbors effect's term for each grid cell at the same time.
-
-# Arguments
-
-- `W::SparseMatrixCSC`: Structure matrix of the inferred GMRF.
-- `μ::Vector{<:Real}`: Value of the location parameter for each grid cell.
-"""
-function neighborsMutualEffect(W::SparseMatrixCSC, μ::Vector{<:Real})
-
-    W⁻ = W - spdiagm(diag(W))
-    W⁻μ = W⁻ * μ
-
-    return -spdiagm(1 ./ diag(W)) * W⁻μ
 
 end
