@@ -13,8 +13,8 @@ export
     adaptHp!,
     plotConvergenceCriterion,
     plotTraceCAVI,
-    plotApproxVSMCMC
-    plotTraceMCMC,
+    plotApproxVSMCMC,
+    plotTraceMCMC
 
 include("CAVI.jl");
 include("plotting.jl");
