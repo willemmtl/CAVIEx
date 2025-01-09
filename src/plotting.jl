@@ -50,7 +50,7 @@ end
 
 
 """
-    plotTrace(model, hyperParam)
+    plotTraceCAVI(model, hyperParam)
 
 Plot evolution of a given hyper-parameter over CAVI iterations.
 
@@ -58,7 +58,7 @@ Plot evolution of a given hyper-parameter over CAVI iterations.
 - `model::Model`: Model.
 - `hyperParam::Symbol`: Hyper-parameter name as it is written in the model.
 """
-function plotTrace(model::Model, hyperParam::Symbol)
+function plotTraceCAVI(model::Model, hyperParam::Symbol)
     
     if isnothing(model.hyperParams[hyperParam].trace)
         error("Aucune trace n'est disponible !")
@@ -71,7 +71,7 @@ function plotTrace(model::Model, hyperParam::Symbol)
         layer(x=1:n_values, y=values, Geom.line),
         layer(x=1:n_values, y=values, Geom.point, shape=[Shape.cross], Theme(default_color="red")),
         Theme(background_color="white"),
-        Guide.title("Trace de $hyperParam"),
+        Guide.title("Trace de $hyperParam dans l'algorithme CAVI"),
         Guide.xlabel("Itérations"),
         Guide.ylabel("Valeur"),
     )
@@ -154,4 +154,32 @@ function plotApproxVSMCMC(
     )
 
     Gadfly.draw(PNG(path, dpi=300), p)
+end
+
+
+"""
+    plotTraceMCMC(model, param)
+
+Plot evolution of a given hyper-parameter over CAVI iterations.
+
+# Arguments
+- `model::Model`: Model.
+- `param::Symbol`: Hyper-parameter name as it is written in the model.
+"""
+function plotTraceMCMC(model::Model, param::Symbol)
+    
+    if isnothing(model.params[param].mcmcSample)
+        error("Aucune trace n'est disponible !")
+    end
+
+    n_values = length(model.params[param].mcmcSample);
+    values = model.params[param].mcmcSample;
+
+    plot(
+        layer(x=1:n_values, y=values, Geom.line),
+        Theme(background_color="white"),
+        Guide.title("Trace de $param dans l'algorithme MCMC"),
+        Guide.xlabel("Itérations"),
+        Guide.ylabel("Valeur"),
+    )
 end

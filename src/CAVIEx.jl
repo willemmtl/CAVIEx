@@ -12,8 +12,9 @@ export
     evaluateLogMvDensity,
     adaptHp!,
     plotConvergenceCriterion,
-    plotTrace,
+    plotTraceCAVI,
     plotApproxVSMCMC
+    plotTraceMCMC,
 
 include("CAVI.jl");
 include("plotting.jl");
